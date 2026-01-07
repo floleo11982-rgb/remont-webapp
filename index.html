@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Расчёт ремонта — FinishPerfekt</title>
+  <title>Точный расчёт ремонта — FinishPerfekt</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     body {
@@ -82,12 +82,16 @@
       border-top: 1px solid #eee;
       padding-top: 16px;
     }
+    .btn-contact {
+      background: #25D366;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
   <div class="card">
     <h2>🧮 Точный расчёт ремонта</h2>
-    
+
     <label>Тип квартиры:</label>
     <select id="apartmentType">
       <option value="1">1-комнатная</option>
@@ -95,93 +99,75 @@
       <option value="3">3-комнатная</option>
     </select>
 
+    <label>Тип ремонта:</label>
+    <select id="repairType">
+      <option value="cosmetic">Косметический</option>
+      <option value="capital" selected>Капитальный</option>
+      <option value="euro">Евро / Дизайнерский</option>
+    </select>
+
     <div id="works"></div>
 
     <div id="result">Смета появится здесь</div>
+
     <button onclick="sendData()">Отправить смету менеджеру</button>
+    <button class="btn-contact" onclick="callManager()">
+      📞 Связаться с менеджером
+    </button>
   </div>
 
   <script>
     // Ваши расценки (только работа, без материалов)
     const PRICES = {
       // Подготовка
-      "demolition_walls": { name: "Демонтаж стен (кирпич)", unit: "м³", price: 3500, defaultQty: 0 },
-      "demolition_gkl": { name: "Демонтаж ГКЛ", unit: "м²", price: 300, defaultQty: 0 },
-      "demolition_tile": { name: "Демонтаж плитки", unit: "м²", price: 500, defaultQty: 0 },
-      "demolition_floor": { name: "Демонтаж пола", unit: "м²", price: 150, defaultQty: 0 },
+      "demolition_walls": { name: "Демонтаж стен (кирпич)", unit: "м³", price: 3500 },
+      "demolition_gkl": { name: "Демонтаж ГКЛ", unit: "м²", price: 300 },
+      "demolition_tile": { name: "Демонтаж плитки", unit: "м²", price: 500 },
+      "demolition_floor": { name: "Демонтаж пола", unit: "м²", price: 150 },
 
       // Стены
-      "plaster_3cm": { name: "Штукатурка (до 3 см)", unit: "м²", price: 1400, defaultQty: 0 },
-      "putty": { name: "Шпаклёвка под покраску", unit: "м²", price: 700, defaultQty: 0 },
-      "wallpaper": { name: "Поклейка обоев", unit: "м²", price: 500, defaultQty: 0 },
-      "paint_walls": { name: "Покраска стен", unit: "м²", price: 600, defaultQty: 0 },
+      "plaster_3cm": { name: "Штукатурка (до 3 см)", unit: "м²", price: 1400 },
+      "putty": { name: "Шпаклёвка под покраску", unit: "м²", price: 700 },
+      "wallpaper": { name: "Поклейка обоев", unit: "м²", price: 500 },
+      "paint_walls": { name: "Покраска стен", unit: "м²", price: 600 },
 
       // Пол
-      "screed_5cm": { name: "Стяжка (до 5 см)", unit: "м²", price: 1500, defaultQty: 0 },
-      "waterproofing": { name: "Гидроизоляция", unit: "м²", price: 350, defaultQty: 0 },
-      "tile_floor": { name: "Плитка на пол", unit: "м²", price: 2200, defaultQty: 0 },
-      "laminate": { name: "Укладка ламината", unit: "м²", price: 400, defaultQty: 0 },
+      "screed_5cm": { name: "Стяжка (до 5 см)", unit: "м²", price: 1500 },
+      "waterproofing": { name: "Гидроизоляция", unit: "м²", price: 350 },
+      "tile_floor": { name: "Плитка на пол", unit: "м²", price: 2200 },
+      "laminate": { name: "Укладка ламината", unit: "м²", price: 400 },
 
       // Сантехника
-      "plumbing_pipes": { name: "Разводка труб", unit: "м.п.", price: 600, defaultQty: 0 },
-      "mixer": { name: "Установка смесителя", unit: "шт", price: 1200, defaultQty: 0 },
-      "toilet": { name: "Унитаз напольный", unit: "шт", price: 1500, defaultQty: 0 },
-      "shower": { name: "Душевая кабина", unit: "шт", price: 4000, defaultQty: 0 },
+      "plumbing_pipes": { name: "Разводка труб", unit: "м.п.", price: 600 },
+      "mixer": { name: "Установка смесителя", unit: "шт", price: 1200 },
+      "toilet": { name: "Унитаз напольный", unit: "шт", price: 1500 },
+      "shower": { name: "Душевая кабина", unit: "шт", price: 4000 },
 
       // Электрика
-      "cable": { name: "Прокладка кабеля", unit: "м.п.", price: 300, defaultQty: 0 },
-      "socket": { name: "Розетка / выключатель", unit: "шт", price: 400, defaultQty: 0 },
-      "lamp": { name: "Установка люстры", unit: "шт", price: 800, defaultQty: 0 },
+      "cable": { name: "Прокладка кабеля", unit: "м.п.", price: 300 },
+      "socket": { name: "Розетка / выключатель", unit: "шт", price: 400 },
+      "lamp": { name: "Установка люстры", unit: "шт", price: 800 },
 
       // Двери
-      "door": { name: "Межкомнатная дверь", unit: "шт", price: 3000, defaultQty: 0 }
+      "door": { name: "Межкомнатная дверь", unit: "шт", price: 3000 }
     };
 
-    // Рекомендуемые объёмы по типу квартиры
+    // Рекомендуемые объёмы по типу ремонта и квартиры
     const DEFAULTS = {
-      "1": {
-        plaster_3cm: 40,
-        putty: 40,
-        wallpaper: 40,
-        screed_5cm: 30,
-        laminate: 30,
-        cable: 50,
-        socket: 12,
-        lamp: 3,
-        door: 2,
-        plumbing_pipes: 20,
-        mixer: 2,
-        toilet: 1
+      "cosmetic": {
+        "1": { wallpaper: 40, paint_walls: 40, laminate: 30, socket: 10, door: 2 },
+        "2": { wallpaper: 60, paint_walls: 60, laminate: 45, socket: 14, door: 3 },
+        "3": { wallpaper: 80, paint_walls: 80, laminate: 60, socket: 18, door: 4 }
       },
-      "2": {
-        plaster_3cm: 60,
-        putty: 60,
-        wallpaper: 60,
-        screed_5cm: 45,
-        laminate: 45,
-        cable: 70,
-        socket: 16,
-        lamp: 4,
-        door: 3,
-        plumbing_pipes: 25,
-        mixer: 3,
-        toilet: 1,
-        shower: 1
+      "capital": {
+        "1": { plaster_3cm: 40, putty: 40, screed_5cm: 30, tile_floor: 15, laminate: 15, cable: 50, socket: 12, lamp: 3, door: 2, plumbing_pipes: 20, mixer: 2, toilet: 1 },
+        "2": { plaster_3cm: 60, putty: 60, screed_5cm: 45, tile_floor: 20, laminate: 25, cable: 70, socket: 16, lamp: 4, door: 3, plumbing_pipes: 25, mixer: 3, toilet: 1, shower: 1 },
+        "3": { plaster_3cm: 80, putty: 80, screed_5cm: 60, tile_floor: 30, laminate: 30, cable: 90, socket: 20, lamp: 5, door: 4, plumbing_pipes: 30, mixer: 4, toilet: 2, shower: 1 }
       },
-      "3": {
-        plaster_3cm: 80,
-        putty: 80,
-        wallpaper: 80,
-        screed_5cm: 60,
-        laminate: 60,
-        cable: 90,
-        socket: 20,
-        lamp: 5,
-        door: 4,
-        plumbing_pipes: 30,
-        mixer: 4,
-        toilet: 2,
-        shower: 1
+      "euro": {
+        "1": { plaster_3cm: 40, putty: 40, screed_5cm: 30, tile_floor: 20, laminate: 10, cable: 60, socket: 15, lamp: 4, door: 2, plumbing_pipes: 25, mixer: 3, toilet: 1, shower: 1 },
+        "2": { plaster_3cm: 60, putty: 60, screed_5cm: 45, tile_floor: 30, laminate: 15, cable: 80, socket: 20, lamp: 5, door: 3, plumbing_pipes: 30, mixer: 4, toilet: 1, shower: 1 },
+        "3": { plaster_3cm: 80, putty: 80, screed_5cm: 60, tile_floor: 40, laminate: 20, cable: 100, socket: 25, lamp: 6, door: 4, plumbing_pipes: 35, mixer: 5, toilet: 2, shower: 2 }
       }
     };
 
@@ -189,7 +175,8 @@
 
     function renderWorks() {
       const type = document.getElementById("apartmentType").value;
-      const defaults = DEFAULTS[type];
+      const repair = document.getElementById("repairType").value;
+      const defaults = DEFAULTS[repair][type] || {};
       let html = '<div class="section"><label>Выберите работы:</label><div class="checkbox-group">';
 
       Object.entries(PRICES).forEach(([key, item]) => {
@@ -208,4 +195,84 @@
               style="margin-top:4px;width:80px;display:block;">` : ''}
           </div>
         `;
-     
+      });
+
+      html += '</div></div>';
+      document.getElementById("works").innerHTML = html;
+      calculate();
+    }
+
+    function toggleWork(key, checked) {
+      const qtyInput = document.getElementById(`qty_${key}`);
+      if (checked) {
+        const type = document.getElementById("apartmentType").value;
+        const repair = document.getElementById("repairType").value;
+        const defaultQty = DEFAULTS[repair][type][key] || 1;
+        currentQuantities[key] = defaultQty;
+        if (qtyInput) qtyInput.value = defaultQty;
+      } else {
+        currentQuantities[key] = 0;
+        if (qtyInput) qtyInput.value = 0;
+      }
+      calculate();
+    }
+
+    function updateQty(key, value) {
+      currentQuantities[key] = parseFloat(value) || 0;
+      calculate();
+    }
+
+    function calculate() {
+      let total = 0;
+      let details = [];
+
+      Object.entries(currentQuantities).forEach(([key, qty]) => {
+        if (qty > 0) {
+          const item = PRICES[key];
+          const lineTotal = qty * item.price;
+          total += lineTotal;
+          details.push({
+            name: item.name,
+            qty: qty,
+            unit: item.unit,
+            price: item.price,
+            total: lineTotal
+          });
+        }
+      });
+
+      const formatted = new Intl.NumberFormat('ru-RU').format(total);
+      document.getElementById("result").innerText = `Итого: ${formatted} ₽`;
+      return { total, details };
+    }
+
+    function sendData() {
+      const { total, details } = calculate();
+      if (total === 0) {
+        alert("Выберите хотя бы одну работу.");
+        return;
+      }
+
+      const data = {
+        apartmentType: document.getElementById("apartmentType").value + "-комн",
+        repairType: document.getElementById("repairType").value,
+        total: total,
+        details: details
+      };
+
+      const WebApp = window.Telegram.WebApp;
+      WebApp.sendData(JSON.stringify(data));
+      WebApp.close();
+    }
+
+    function callManager() {
+      window.Telegram.WebApp.openTelegramLink("https://t.me/grigorii_saveliev");
+    }
+
+    // Инициализация
+    document.getElementById("apartmentType").addEventListener("change", renderWorks);
+    document.getElementById("repairType").addEventListener("change", renderWorks);
+    renderWorks();
+  </script>
+</body>
+</html>
