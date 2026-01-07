@@ -5,43 +5,58 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Приблизительный расчёт ремонта — FinishPerfekt</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --primary: #d35400;
+      --primary-dark: #a04000;
+      --secondary: #2c3e50;
+      --bg: #fdf6f0;
+      --card-bg: #ffffff;
+      --text: #2c3e50;
+      --price: #27ae60;
+    }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f9f9f9;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
       padding: 16px;
       margin: 0;
-      color: #333;
+      color: var(--text);
     }
     .card {
-      background: white;
-      border-radius: 16px;
-      padding: 20px;
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 24px;
       margin: 12px 0;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
     }
     h2 {
-      font-size: 20px;
-      margin: 0 0 16px;
+      font-size: 22px;
+      margin: 0 0 20px;
+      color: var(--secondary);
+      text-align: center;
     }
     label {
       display: block;
-      margin: 12px 0 6px;
+      margin: 14px 0 8px;
       font-weight: 600;
+      font-size: 16px;
     }
     input, select {
       width: 100%;
-      padding: 12px;
-      border: 1px solid #ddd;
-      border-radius: 10px;
+      padding: 14px;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
       font-size: 16px;
       box-sizing: border-box;
+      background: #fcfcfc;
     }
     .checkbox-group {
       display: flex;
       flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 8px;
+      gap: 14px;
+      margin-top: 10px;
     }
     .checkbox-item {
       flex: 1 1 45%;
@@ -51,75 +66,96 @@
       margin: 0;
       font-weight: normal;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       cursor: pointer;
+      flex-direction: column;
+      align-items: start;
     }
     .checkbox-item input[type="checkbox"] {
       width: auto;
-      margin-right: 8px;
+      margin: 0 0 6px 0;
+      accent-color: var(--primary);
     }
     .checkbox-item input[type="number"] {
       margin-top: 4px;
       width: 80px;
-      display: block;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
     }
     #result {
-      font-size: 18px;
-      font-weight: bold;
-      color: #0088cc;
-      margin: 16px 0;
-      padding: 12px;
-      background: #eef7ff;
-      border-radius: 10px;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--primary-dark);
+      margin: 20px 0;
+      padding: 16px;
+      background: #fff8e1;
+      border-radius: 14px;
+      text-align: center;
+      border-left: 4px solid var(--primary);
     }
     button {
-      background: #0088cc;
+      background: var(--primary);
       color: white;
       border: none;
-      padding: 16px;
-      border-radius: 12px;
+      padding: 18px;
+      border-radius: 14px;
       font-size: 18px;
       width: 100%;
       font-weight: 600;
-      margin-top: 10px;
+      margin-top: 12px;
+      transition: background 0.2s;
+      font-family: 'Inter', sans-serif;
+    }
+    button:hover {
+      background: var(--primary-dark);
     }
     .btn-contact {
-      background: #25D366;
-      margin-top: 10px;
+      background: #27ae60;
+    }
+    .btn-contact:hover {
+      background: #219653;
     }
     .section {
-      border-top: 1px solid #eee;
-      padding-top: 16px;
+      border-top: 1px solid #f0f0f0;
+      padding-top: 20px;
+      margin-top: 20px;
     }
     .section-title {
-      font-weight: bold;
-      margin: 16px 0 8px;
-      color: #333;
+      font-weight: 700;
+      margin: 0 0 16px;
+      color: var(--secondary);
+      font-size: 18px;
     }
     .price-note {
-      font-size: 12px;
+      font-size: 13px;
       color: #666;
-      margin-top: 2px;
+      margin-top: 4px;
+      font-weight: 500;
     }
     .tab-buttons {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 10px;
       margin: 16px 0;
     }
     .tab-button {
-      padding: 12px 16px;
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 8px;
+      padding: 14px;
+      background: #f8f9fa;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
       cursor: pointer;
       text-align: center;
-      flex: 1 1 200px;
+      flex: 1 1 180px;
       min-width: 120px;
+      font-weight: 600;
+      font-size: 15px;
+      transition: all 0.2s;
     }
     .tab-button.active {
-      background: #0088cc;
+      background: var(--primary);
       color: white;
+      border-color: var(--primary);
     }
   </style>
 </head>
@@ -294,7 +330,6 @@
           const isSquare = item.unit === "м²";
           let qty = currentQuantities[key]?.qty || 0;
 
-          // Если значения нет — подставляем автоматику для капитального
           if (qty === 0 && document.getElementById("repairType").value === "capital") {
             if (isSquare) {
               qty = Math.round(area * 0.8);
