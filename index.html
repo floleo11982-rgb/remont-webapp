@@ -278,7 +278,7 @@
     function showSection(sectionName) {
       // Убираем активный класс со всех кнопок
       document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-      // Добавляем активный класс к выбранной
+      // Находим кнопку, по которой кликнули
       event.target.classList.add('active');
       // Обновляем текущий раздел
       activeSection = sectionName;
