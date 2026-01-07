@@ -276,6 +276,11 @@
     let activeSection = "Монтаж потолков";
 
     function showSection(sectionName) {
+      // Убираем активный класс со всех кнопок
+      document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+      // Добавляем активный класс к выбранной
+      event.target.classList.add('active');
+      // Обновляем текущий раздел
       activeSection = sectionName;
       renderWorks();
     }
@@ -285,7 +290,6 @@
       const rooms = document.getElementById("rooms").value;
       let html = '';
 
-      // Отображаем только активный раздел
       if (WORKS_DATA[activeSection]) {
         html += `<div class="section"><div class="section-title">🧱 ${activeSection}</div><div class="checkbox-group">`;
 
@@ -338,7 +342,6 @@
         if (unit === "м²") {
           qty = Math.round(area * 0.8);
         } else if (price <= 1000 && !isNaN(area)) {
-          // Для недорогих работ — автоматика
           if (key.includes("дверь")) {
             qty = parseInt(rooms) + 1;
           } else if (key.includes("розетка")) {
