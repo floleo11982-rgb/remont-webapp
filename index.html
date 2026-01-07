@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Точный расчёт ремонта — FinishPerfekt</title>
+  <title>Приблизительный расчёт ремонта — FinishPerfekt</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     body {
@@ -125,7 +125,7 @@
 </head>
 <body>
   <div class="card">
-    <h2>🧮 Точный расчёт ремонта</h2>
+    <h2>Приблизительный расчёт ремонта</h2>
 
     <label>Площадь квартиры (м²):</label>
     <input type="number" id="area" placeholder="Например: 52" min="20" max="200" value="52">
@@ -164,12 +164,11 @@
 
     <button onclick="sendData()">Отправить смету менеджеру</button>
     <button class="btn-contact" onclick="callMaster()">
-      📞 Связаться с мастером
+      Связаться с мастером
     </button>
   </div>
 
   <script>
-    // === СМЕТА: 80 популярных работ с ЛУЧШИМИ ценами из 8 источников ===
     const WORKS_DATA = {
       "Монтаж потолков": [
         { "name": "Грунтовка потолка", "unit": "м²", "price": 60 },
@@ -288,14 +287,15 @@
       let html = '';
 
       if (WORKS_DATA[activeSection]) {
-        html += `<div class="section"><div class="section-title">🧱 ${activeSection}</div><div class="checkbox-group">`;
+        html += `<div class="section"><div class="section-title">${activeSection}</div><div class="checkbox-group">`;
 
         WORKS_DATA[activeSection].forEach((item, idx) => {
           const key = `${activeSection}_${idx}`.replace(/\s+/g, '_').toLowerCase();
           const isSquare = item.unit === "м²";
-          let qty = 0;
+          let qty = currentQuantities[key]?.qty || 0;
 
-          if (document.getElementById("repairType").value === "capital") {
+          // Если значения нет — подставляем автоматику для капитального
+          if (qty === 0 && document.getElementById("repairType").value === "capital") {
             if (isSquare) {
               qty = Math.round(area * 0.8);
             } else if (item.name.includes("дверь")) {
@@ -312,7 +312,9 @@
           html += `
             <div class="checkbox-item">
               <label>
-                <input type="checkbox" id="work_${key}" onchange="toggleWork('${key}', this.checked, ${item.price}, '${item.unit}')">
+                <input type="checkbox" id="work_${key}" 
+                  ${currentQuantities[key] && currentQuantities[key].qty > 0 ? 'checked' : ''} 
+                  onchange="toggleWork('${key}', this.checked, ${item.price}, '${item.unit}')">
                 ${item.name}
               </label>
               <div class="price-note">${item.price} ₽ / ${item.unit}</div>
@@ -358,9 +360,10 @@
 
     function updateQty(key, value) {
       const qty = parseFloat(value) || 0;
-      if (currentQuantities[key]) {
-        currentQuantities[key].qty = qty;
-      }
+      currentQuantities[key] = {
+        ...(currentQuantities[key] || {}),
+        qty: qty
+      };
       calculate();
     }
 
@@ -400,13 +403,13 @@
       const date = new Date().toLocaleString('ru-RU');
 
       const textContent = `
-📌 Смета от ${date}
-🏠 Площадь: ${area} м² | Комната: ${rooms} | Тип ремонта: ${repairType}
+Смета от ${date}
+Площадь: ${area} м² | Комната: ${rooms} | Тип ремонта: ${repairType}
 
-📋 Работы:
+Работы:
 ${details.join('\n')}
 
-💰 Итого: ${new Intl.NumberFormat('ru-RU').format(totalSum)} ₽
+Итого: ${new Intl.NumberFormat('ru-RU').format(totalSum)} ₽
 
 ---
 Сохранено автоматически.
