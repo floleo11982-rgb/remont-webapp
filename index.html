@@ -1,78 +1,211 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Ремонт квартир — Расчёт</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Расчёт ремонта — FinishPerfekt</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
-    .card { background: white; padding: 20px; border-radius: 10px; margin: 10px 0; }
-    button { background: #0088cc; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-size: 16px; margin-top: 15px; }
-    select, input { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 6px; }
-    #result { font-size: 18px; font-weight: bold; margin-top: 15px; color: #0088cc; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f9f9f9;
+      padding: 16px;
+      margin: 0;
+      color: #333;
+    }
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      margin: 12px 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    h2 {
+      font-size: 20px;
+      margin: 0 0 16px;
+    }
+    label {
+      display: block;
+      margin: 12px 0 6px;
+      font-weight: 600;
+    }
+    input, select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 8px;
+    }
+    .checkbox-item {
+      flex: 1 1 45%;
+      min-width: 140px;
+    }
+    .checkbox-item label {
+      margin: 0;
+      font-weight: normal;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+    .checkbox-item input {
+      width: auto;
+      margin-right: 8px;
+    }
+    #result {
+      font-size: 18px;
+      font-weight: bold;
+      color: #0088cc;
+      margin: 16px 0;
+      padding: 12px;
+      background: #eef7ff;
+      border-radius: 10px;
+    }
+    button {
+      background: #0088cc;
+      color: white;
+      border: none;
+      padding: 16px;
+      border-radius: 12px;
+      font-size: 18px;
+      width: 100%;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+    .section {
+      border-top: 1px solid #eee;
+      padding-top: 16px;
+    }
   </style>
 </head>
 <body>
   <div class="card">
-    <h2>🧮 Рассчитайте стоимость ремонта</h2>
+    <h2>🧮 Точный расчёт ремонта</h2>
     
-    <label>Площадь квартиры (м²):</label>
-    <input type="number" id="area" placeholder="Например: 45" min="20" max="200">
-
-    <label>Тип отделки стен:</label>
-    <select id="walls">
-      <option value="4000">Обои (базовый)</option>
-      <option value="6000">Покраска (премиум)</option>
-      <option value="8000">Плитка + декор (дизайнерский)</option>
+    <label>Тип квартиры:</label>
+    <select id="apartmentType">
+      <option value="1">1-комнатная</option>
+      <option value="2" selected>2-комнатная</option>
+      <option value="3">3-комнатная</option>
     </select>
 
-    <label>Напольное покрытие:</label>
-    <select id="floor">
-      <option value="3000">Ламинат</option>
-      <option value="5000">Плитка</option>
-      <option value="9000">Паркет / Массив</option>
-    </select>
+    <div id="works"></div>
 
-    <label>Сантехника:</label>
-    <select id="plumbing">
-      <option value="1500">Бюджет (Rossinka, Santek)</option>
-      <option value="3500">Премиум (Grohe, Hansgrohe)</option>
-    </select>
-
-    <div id="result">Сумма появится здесь</div>
-    <button onclick="sendData()">Отправить расчёт менеджеру</button>
+    <div id="result">Смета появится здесь</div>
+    <button onclick="sendData()">Отправить смету менеджеру</button>
   </div>
 
   <script>
-    function calculate() {
-      const area = parseFloat(document.getElementById('area').value) || 0;
-      const walls = parseFloat(document.getElementById('walls').value) || 0;
-      const floor = parseFloat(document.getElementById('floor').value) || 0;
-      const plumbing = parseFloat(document.getElementById('plumbing').value) || 0;
+    // Ваши расценки (только работа, без материалов)
+    const PRICES = {
+      // Подготовка
+      "demolition_walls": { name: "Демонтаж стен (кирпич)", unit: "м³", price: 3500, defaultQty: 0 },
+      "demolition_gkl": { name: "Демонтаж ГКЛ", unit: "м²", price: 300, defaultQty: 0 },
+      "demolition_tile": { name: "Демонтаж плитки", unit: "м²", price: 500, defaultQty: 0 },
+      "demolition_floor": { name: "Демонтаж пола", unit: "м²", price: 150, defaultQty: 0 },
 
-      const total = area * (walls + floor + plumbing);
-      document.getElementById('result').innerText = `Итого: ${total.toLocaleString()} ₽`;
-      return { area, walls, floor, plumbing, total };
-    }
+      // Стены
+      "plaster_3cm": { name: "Штукатурка (до 3 см)", unit: "м²", price: 1400, defaultQty: 0 },
+      "putty": { name: "Шпаклёвка под покраску", unit: "м²", price: 700, defaultQty: 0 },
+      "wallpaper": { name: "Поклейка обоев", unit: "м²", price: 500, defaultQty: 0 },
+      "paint_walls": { name: "Покраска стен", unit: "м²", price: 600, defaultQty: 0 },
 
-    function sendData() {
-      const data = calculate();
-      if (data.area < 20) {
-        alert("Укажите площадь от 20 м²");
-        return;
+      // Пол
+      "screed_5cm": { name: "Стяжка (до 5 см)", unit: "м²", price: 1500, defaultQty: 0 },
+      "waterproofing": { name: "Гидроизоляция", unit: "м²", price: 350, defaultQty: 0 },
+      "tile_floor": { name: "Плитка на пол", unit: "м²", price: 2200, defaultQty: 0 },
+      "laminate": { name: "Укладка ламината", unit: "м²", price: 400, defaultQty: 0 },
+
+      // Сантехника
+      "plumbing_pipes": { name: "Разводка труб", unit: "м.п.", price: 600, defaultQty: 0 },
+      "mixer": { name: "Установка смесителя", unit: "шт", price: 1200, defaultQty: 0 },
+      "toilet": { name: "Унитаз напольный", unit: "шт", price: 1500, defaultQty: 0 },
+      "shower": { name: "Душевая кабина", unit: "шт", price: 4000, defaultQty: 0 },
+
+      // Электрика
+      "cable": { name: "Прокладка кабеля", unit: "м.п.", price: 300, defaultQty: 0 },
+      "socket": { name: "Розетка / выключатель", unit: "шт", price: 400, defaultQty: 0 },
+      "lamp": { name: "Установка люстры", unit: "шт", price: 800, defaultQty: 0 },
+
+      // Двери
+      "door": { name: "Межкомнатная дверь", unit: "шт", price: 3000, defaultQty: 0 }
+    };
+
+    // Рекомендуемые объёмы по типу квартиры
+    const DEFAULTS = {
+      "1": {
+        plaster_3cm: 40,
+        putty: 40,
+        wallpaper: 40,
+        screed_5cm: 30,
+        laminate: 30,
+        cable: 50,
+        socket: 12,
+        lamp: 3,
+        door: 2,
+        plumbing_pipes: 20,
+        mixer: 2,
+        toilet: 1
+      },
+      "2": {
+        plaster_3cm: 60,
+        putty: 60,
+        wallpaper: 60,
+        screed_5cm: 45,
+        laminate: 45,
+        cable: 70,
+        socket: 16,
+        lamp: 4,
+        door: 3,
+        plumbing_pipes: 25,
+        mixer: 3,
+        toilet: 1,
+        shower: 1
+      },
+      "3": {
+        plaster_3cm: 80,
+        putty: 80,
+        wallpaper: 80,
+        screed_5cm: 60,
+        laminate: 60,
+        cable: 90,
+        socket: 20,
+        lamp: 5,
+        door: 4,
+        plumbing_pipes: 30,
+        mixer: 4,
+        toilet: 2,
+        shower: 1
       }
+    };
 
-      // Отправка данных в Telegram-бота
-      const WebApp = window.Telegram.WebApp;
-      WebApp.sendData(JSON.stringify(data));
-      WebApp.close();
-    }
+    let currentQuantities = {};
 
-    // Пересчёт при изменении
-    document.querySelectorAll('input, select').forEach(el => {
-      el.addEventListener('input', calculate);
-    });
-  </script>
-</body>
-</html>
+    function renderWorks() {
+      const type = document.getElementById("apartmentType").value;
+      const defaults = DEFAULTS[type];
+      let html = '<div class="section"><label>Выберите работы:</label><div class="checkbox-group">';
+
+      Object.entries(PRICES).forEach(([key, item]) => {
+        const qty = defaults[key] || 0;
+        currentQuantities[key] = qty;
+        const id = `work_${key}`;
+        html += `
+          <div class="checkbox-item">
+            <label>
+              <input type="checkbox" id="${id}" ${qty > 0 ? 'checked' : ''} 
+                onchange="toggleWork('${key}', this.checked)">
+              ${item.name}
+            </label>
+            ${qty > 0 ? `<input type="number" id="qty_${key}" value="${qty}" min="0" 
+              onchange="updateQty('${key}', this.value)" 
+              style="margin-top:4px;width:80px;display:block;">` : ''}
+          </div>
+        `;
+     
