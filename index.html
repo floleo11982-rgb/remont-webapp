@@ -54,9 +54,14 @@
       align-items: center;
       cursor: pointer;
     }
-    .checkbox-item input {
+    .checkbox-item input[type="checkbox"] {
       width: auto;
       margin-right: 8px;
+    }
+    .checkbox-item input[type="number"] {
+      margin-top: 4px;
+      width: 80px;
+      display: block;
     }
     #result {
       font-size: 18px;
@@ -91,6 +96,11 @@
       margin: 16px 0 8px;
       color: #333;
     }
+    .price-note {
+      font-size: 12px;
+      color: #666;
+      margin-top: 2px;
+    }
   </style>
 </head>
 <body>
@@ -98,7 +108,7 @@
     <h2>🧮 Точный расчёт ремонта</h2>
 
     <label>Площадь квартиры (м²):</label>
-    <input type="number" id="area" placeholder="Например: 52" min="20" max="200" value="52" onchange="updateDefaults()">
+    <input type="number" id="area" placeholder="Например: 52" min="20" max="200" value="52">
 
     <label>Тип ремонта:</label>
     <select id="repairType">
@@ -107,187 +117,7 @@
       <option value="euro">Евро / Дизайнерский</option>
     </select>
 
-    <!-- Демонтажные работы -->
-    <div class="section">
-      <div class="section-title">🔨 Демонтажные работы</div>
-      <div class="checkbox-group">
-        <div class="checkbox-item">
-          <label>
-            <input type="checkbox" id="work_demolition_walls" onchange="toggleWork('demolition_walls', this.checked)">
-            Демонтаж стен (кирпич)
-          </label>
-          <input type="number" id="qty_demolition_walls" value="0" min="0" onchange="updateQty('demolition_walls', this.value)" style="margin-top:4px;width:80px;display:block;">
-        </div>
-        <div class="checkbox-item">
-          <label>
-            <input type="checkbox" id="work_demolition_gkl" onchange="toggleWork('demolition_gkl', this.checked)">
-            Демонтаж ГКЛ
-          </label>
-          <input type="number" id="qty_demolition_gkl" value="0" min="0" onchange="updateQty('demolition_gkl', this.value)" style="margin-top:4px;width:80px;display:block;">
-        </div>
-        <div class="checkbox-item">
-          <label>
-            <input type="checkbox" id="work_demolition_tile" onchange="toggleWork('demolition_tile', this.checked)">
-            Демонтаж плитки
-          </label>
-          <input type="number" id="qty_demolition_tile" value="0" min="0" onchange="updateQty('demolition_tile', this.value)" style="margin-top:4px;width:80px;display:block;">
-        </div>
-        <div class="checkbox-item">
-          <label>
-            <input type="checkbox" id="work_demolition_floor" onchange="toggleWork('demolition_floor', this.checked)">
-            Демонтаж пола
-          </label>
-          <input type="number" id="qty_demolition_floor" value="0" min="0" onchange="updateQty('demolition_floor', this.value)" style="margin-top:4px;width:80px;display:block;">
-        </div>
-      </div>
-    </div>
-
-    <!-- Штукатурка и шпаклёвка -->
-    <div class="section">
-      <div class="section-title">🖌️ Штукатурка и шпаклёвка</div>
-      <div class="checkbox-group">
-        <div class="checkbox-item">
-          <label>
-            <input type="checkbox" id="work_plaster_3cm" onchange="toggleWork('plaster_3cm', this.checked)">
-            Штукатурка (до 3 см)
-          </label>
-          <input type="number" id="qty_plaster_3cm" value="0" min="0" onchange="updateQty('plaster_3cm', this.value)" style="margin-top:4px;width:80px;display:block;">
-        </div>
-        <div class="checkbox-item">
-          <label>
-            <input type="checkbox" id="work_putty" onchange="toggleWork('putty', this.checked)">
-            Шпаклёвка под покраску
-          </label>
-          <input type="number" id="qty_putty" value="0" min="0" onchange="updateQty('putty', this.value)" style="margin-top:4px;width:80px;display:block;">
-        </div>
-      </div>
-    </div>
-
-    <!-- Плитка и покраска -->
-    <div class="section">
-      <div class="section-title">🟥 Плитка и покраска</div>
-      <div class="checkbox-group">
-        <div class="checkbox-item">
-          <label>
-            <input type="checkbox" id="work_wallpaper" onchange="toggleWork('wallpaper', this.checked)">
-            Поклейка обоев
-          </label>
-          <input type="number" id="qty_wallpaper" value="0" min="0" onchange="updateQty('wallpaper', this.value)" style="margin-top:4px;width:80px;display:block;">
-        </div>
-        <div class="checkbox-item">
-          <label>
-            <input type="checkbox" id="work_paint_walls" onchange="toggleWork('paint_walls', this.checked)">
-            Покраска стен
-          </label>
-          <input type="number" id="qty_paint_walls" value="0" min="0" onchange="updateQty('paint_walls', this.value)" style="margin-top:4px;width:80px;display:block;">
-        </div>
-        <div class="checkbox-item">
-          <label>
-            <input type="checkbox" id="work_tile_floor" onchange="toggleWork('tile_floor', this.checked)">
-            Плитка на пол
-          </label>
-          <input type="number" id="qty_tile_floor" value="0" min="0" onchange="updateQty('tile_floor', this.value)" style="margin-top:4px;width:80px;display:block;">
-        </div>
-        <div class="checkbox-item">
-          <label>
-            <input type="checkbox" id="work_waterproofing" onchange="toggleWork('waterproofing', this.checked)">
-            Гидроизоляция
-          </label>
-          <input type="number" id="qty_waterproofing" value="0" min="0" onchange="updateQty('waterproofing', this.value)" style="margin-top:4px;width:80px;display:block;">
-        </div>
-      </div>
-    </div>
-
-    <!-- Напольные покрытия -->
-    <div class="section">
-      <div class="section-title">🪵 Напольные покрытия</div>
-      <div class="checkbox-group">
-        <div class="checkbox-item">
-          <label>
-            <input type="checkbox" id="work_screed_5cm" onchange="toggleWork('screed_5cm', this.checked)">
-            Стяжка (до 5 см)
-          </label>
-          <input type="number" id="qty_screed_5cm" value="0" min="0" onchange="updateQty('screed_5cm', this.value)" style="margin-top:4px;width:80px;display:block;">
-        </div>
-        <div class="checkbox-item">
-          <label>
-            <input type="checkbox" id="work_laminate" onchange="toggleWork('laminate', this.checked)">
-            Укладка ламината
-          </label>
-          <input type="number" id="qty_laminate" value="0" min="0" onchange="updateQty('laminate', this.value)" style="margin-top:4px;width:80px;display:block;">
-        </div>
-      </div>
-    </div>
-
-    <!-- Обои и гипсокартон -->
-    <div class="section">
-      <div class="section-title">🧱 Обои и гипсокартон</div>
-      <div class="checkbox-group">
-        <div class="checkbox-item">
-          <label>
-            <input type="checkbox" id="work_door" onchange="toggleWork('door', this.checked)">
-            Межкомнатная дверь
-          </label>
-          <input type="number" id="qty_door" value="0" min="0" onchange="updateQty('door', this.value)" style="margin-top:4px;width:80px;display:block;">
-        </div>
-        <div class="checkbox-item">
-          <label>
-            <input type="checkbox" id="work_cable" onchange="toggleWork('cable', this.checked)">
-            Прокладка кабеля
-          </label>
-          <input type="number" id="qty_cable" value="0" min="0" onchange="updateQty('cable', this.value)" style="margin-top:4px;width:80px;display:block;">
-        </div>
-        <div class="checkbox-item">
-          <label>
-            <input type="checkbox" id="work_socket" onchange="toggleWork('socket', this.checked)">
-            Розетка / выключатель
-          </label>
-          <input type="number" id="qty_socket" value="0" min="0" onchange="updateQty('socket', this.value)" style="margin-top:4px;width:80px;display:block;">
-        </div>
-        <div class="checkbox-item">
-          <label>
-            <input type="checkbox" id="work_lamp" onchange="toggleWork('lamp', this.checked)">
-            Установка люстры
-          </label>
-          <input type="number" id="qty_lamp" value="0" min="0" onchange="updateQty('lamp', this.value)" style="margin-top:4px;width:80px;display:block;">
-        </div>
-      </div>
-    </div>
-
-    <!-- Сантехника -->
-    <div class="section">
-      <div class="section-title">🚰 Сантехника</div>
-      <div class="checkbox-group">
-        <div class="checkbox-item">
-          <label>
-            <input type="checkbox" id="work_plumbing_pipes" onchange="toggleWork('plumbing_pipes', this.checked)">
-            Разводка труб
-          </label>
-          <input type="number" id="qty_plumbing_pipes" value="0" min="0" onchange="updateQty('plumbing_pipes', this.value)" style="margin-top:4px;width:80px;display:block;">
-        </div>
-        <div class="checkbox-item">
-          <label>
-            <input type="checkbox" id="work_mixer" onchange="toggleWork('mixer', this.checked)">
-            Установка смесителя
-          </label>
-          <input type="number" id="qty_mixer" value="0" min="0" onchange="updateQty('mixer', this.value)" style="margin-top:4px;width:80px;display:block;">
-        </div>
-        <div class="checkbox-item">
-          <label>
-            <input type="checkbox" id="work_toilet" onchange="toggleWork('toilet', this.checked)">
-            Унитаз напольный
-          </label>
-          <input type="number" id="qty_toilet" value="0" min="0" onchange="updateQty('toilet', this.value)" style="margin-top:4px;width:80px;display:block;">
-        </div>
-        <div class="checkbox-item">
-          <label>
-            <input type="checkbox" id="work_shower" onchange="toggleWork('shower', this.checked)">
-            Душевая кабина
-          </label>
-          <input type="number" id="qty_shower" value="0" min="0" onchange="updateQty('shower', this.value)" style="margin-top:4px;width:80px;display:block;">
-        </div>
-      </div>
-    </div>
+    <div id="works"></div>
 
     <div id="result">Смета появится здесь</div>
 
@@ -298,150 +128,199 @@
   </div>
 
   <script>
-    // Ваши расценки (только работа, без материалов)
-    const PRICES = {
-      "demolition_walls": { name: "Демонтаж стен (кирпич)", unit: "м³", price: 3500 },
-      "demolition_gkl": { name: "Демонтаж ГКЛ", unit: "м²", price: 300 },
-      "demolition_tile": { name: "Демонтаж плитки", unit: "м²", price: 500 },
-      "demolition_floor": { name: "Демонтаж пола", unit: "м²", price: 150 },
-
-      "plaster_3cm": { name: "Штукатурка (до 3 см)", unit: "м²", price: 1400 },
-      "putty": { name: "Шпаклёвка под покраску", unit: "м²", price: 700 },
-
-      "wallpaper": { name: "Поклейка обоев", unit: "м²", price: 500 },
-      "paint_walls": { name: "Покраска стен", unit: "м²", price: 600 },
-      "tile_floor": { name: "Плитка на пол", unit: "м²", price: 2200 },
-      "waterproofing": { name: "Гидроизоляция", unit: "м²", price: 350 },
-
-      "screed_5cm": { name: "Стяжка (до 5 см)", unit: "м²", price: 1500 },
-      "laminate": { name: "Укладка ламината", unit: "м²", price: 400 },
-
-      "door": { name: "Межкомнатная дверь", unit: "шт", price: 3000 },
-      "cable": { name: "Прокладка кабеля", unit: "м.п.", price: 300 },
-      "socket": { name: "Розетка / выключатель", unit: "шт", price: 400 },
-      "lamp": { name: "Установка люстры", unit: "шт", price: 800 },
-
-      "plumbing_pipes": { name: "Разводка труб", unit: "м.п.", price: 600 },
-      "mixer": { name: "Установка смесителя", unit: "шт", price: 1200 },
-      "toilet": { name: "Унитаз напольный", unit: "шт", price: 1500 },
-      "shower": { name: "Душевая кабина", unit: "шт", price: 4000 }
+    // === СМЕТА: 80 популярных работ с ЛУЧШИМИ ценами из 8 источников ===
+    const WORKS_DATA = {
+      "Демонтажные работы": [
+        { "name": "Очистка стен от обоев", "unit": "м²", "price": 80 },
+        { "name": "Демонтаж штукатурки со стен", "unit": "м²", "price": 135 },
+        { "name": "Демонтаж плитки со стен", "unit": "м²", "price": 150 },
+        { "name": "Очистка стен от краски, шпатлёвки, побелки", "unit": "м²", "price": 150 },
+        { "name": "Демонтаж ламината", "unit": "м²", "price": 60 },
+        { "name": "Демонтаж паркетной доски", "unit": "м²", "price": 60 },
+        { "name": "Демонтаж линолеума", "unit": "м²", "price": 60 },
+        { "name": "Демонтаж стяжки (до 5 см)", "unit": "м²", "price": 180 },
+        { "name": "Демонтаж перегородок из ГКЛ", "unit": "м²", "price": 160 },
+        { "name": "Демонтаж унитаза", "unit": "шт", "price": 300 },
+        { "name": "Демонтаж ванны", "unit": "шт", "price": 500 },
+        { "name": "Демонтаж смесителя", "unit": "шт", "price": 150 }
+      ],
+      "Штукатурные работы": [
+        { "name": "Грунтовка стен", "unit": "м²", "price": 40 },
+        { "name": "Обработка бетоноконтактом", "unit": "м²", "price": 50 },
+        { "name": "Установка маяков", "unit": "м.п.", "price": 80 },
+        { "name": "Штукатурка стен по маякам", "unit": "м²", "price": 400 },
+        { "name": "Шпатлевка стен под обои", "unit": "м²", "price": 200 },
+        { "name": "Шпатлевка стен под покраску", "unit": "м²", "price": 250 },
+        { "name": "Шлифовка стен под покраску", "unit": "м²", "price": 50 }
+      ],
+      "Малярные работы": [
+        { "name": "Поклейка обоев без подбора рисунка", "unit": "м²", "price": 200 },
+        { "name": "Поклейка обоев с подбором рисунка", "unit": "м²", "price": 250 },
+        { "name": "Покраска стен (2 слоя)", "unit": "м²", "price": 220 },
+        { "name": "Покраска потолка (2 слоя)", "unit": "м²", "price": 250 },
+        { "name": "Нанесение декоративной штукатурки", "unit": "м²", "price": 500 }
+      ],
+      "Плиточные работы": [
+        { "name": "Укладка керамической плитки на стены", "unit": "м²", "price": 1000 },
+        { "name": "Укладка керамической плитки на пол", "unit": "м²", "price": 1000 },
+        { "name": "Укладка керамогранита на пол", "unit": "м²", "price": 1200 },
+        { "name": "Затирка швов плитки", "unit": "м²", "price": 150 },
+        { "name": "Гидроизоляция пола", "unit": "м²", "price": 80 }
+      ],
+      "Напольные работы": [
+        { "name": "Устройство стяжки пола (до 5 см)", "unit": "м²", "price": 400 },
+        { "name": "Выравнивание пола самонивелиром", "unit": "м²", "price": 250 },
+        { "name": "Укладка ламината", "unit": "м²", "price": 400 },
+        { "name": "Укладка паркетной доски", "unit": "м²", "price": 600 },
+        { "name": "Укладка линолеума", "unit": "м²", "price": 250 },
+        { "name": "Укладка кварцвинила", "unit": "м²", "price": 380 },
+        { "name": "Установка напольного плинтуса (пластик)", "unit": "м.п.", "price": 100 }
+      ],
+      "Потолочные работы": [
+        { "name": "Шпатлевка потолка под покраску", "unit": "м²", "price": 350 },
+        { "name": "Покраска потолка", "unit": "м²", "price": 250 },
+        { "name": "Монтаж ГКЛ на потолок (1 уровень)", "unit": "м²", "price": 700 },
+        { "name": "Монтаж ГКЛ на потолок (2 уровня)", "unit": "м²", "price": 1000 },
+        { "name": "Установка натяжного потолка", "unit": "м²", "price": 450 }
+      ],
+      "Сантехнические работы": [
+        { "name": "Прокладка труб водоснабжения (металлопластик)", "unit": "м.п.", "price": 70 },
+        { "name": "Прокладка канализационных труб", "unit": "м..p.", "price": 70 },
+        { "name": "Установка смесителя", "unit": "шт", "price": 300 },
+        { "name": "Установка унитаза напольного", "unit": "шт", "price": 1000 },
+        { "name": "Установка унитаза подвесного", "unit": "шт", "price": 1500 },
+        { "name": "Установка раковины", "unit": "шт", "price": 800 },
+        { "name": "Установка ванны", "unit": "шт", "price": 1200 },
+        { "name": "Установка душевой кабины", "unit": "шт", "price": 2500 },
+        { "name": "Установка полотенцесушителя", "unit": "шт", "price": 800 },
+        { "name": "Установка водонагревателя", "unit": "шт", "price": 1000 },
+        { "name": "Монтаж сантехнического люка", "unit": "шт", "price": 250 }
+      ],
+      "Электромонтажные работы": [
+        { "name": "Штробление в кирпиче", "unit": "м.п.", "price": 100 },
+        { "name": "Штробление в бетоне", "unit": "м.п.", "price": 180 },
+        { "name": "Прокладка кабеля 3×1.5 / 3×2.5", "unit": "м.п.", "price": 60 },
+        { "name": "Монтаж розетки / выключателя", "unit": "шт", "price": 150 },
+        { "name": "Монтаж люстры", "unit": "шт", "price": 500 },
+        { "name": "Монтаж точечного светильника", "unit": "шт", "price": 250 },
+        { "name": "Монтаж распределительного щита (до 24 мод)", "unit": "шт", "price": 2000 }
+      ],
+      "Перегородки": [
+        { "name": "Монтаж перегородки из ГКЛ (1 слой)", "unit": "м²", "price": 500 },
+        { "name": "Монтаж перегородки из ГКЛ (2 слоя)", "unit": "м²", "price": 600 },
+        { "name": "Монтаж перегородки из кирпича (1/2)", "unit": "м²", "price": 700 }
+      ],
+      "Двери и окна": [
+        { "name": "Установка межкомнатной двери (стандарт)", "unit": "шт", "price": 3000 },
+        { "name": "Установка подоконника", "unit": "м.п.", "price": 350 },
+        { "name": "Установка ПВХ откосов", "unit": "м.п.", "price": 380 }
+      ],
+      "Прочие работы": [
+        { "name": "Обшивка стен вагонкой", "unit": "м²", "price": 450 },
+        { "name": "Обшивка стен ПВХ панелями", "unit": "м²", "price": 300 },
+        { "name": "Установка зеркала", "unit": "шт", "price": 350 },
+        { "name": "Устройство арки из ГКЛ", "unit": "шт", "price": 3000 },
+        { "name": "Установка Бра", "unit": "шт", "price": 500 },
+        { "name": "Монтаж вентиляционной решётки", "unit": "шт", "price": 250 },
+        { "name": "Установка стиральной машины", "unit": "шт", "price": 1000 },
+        { "name": "Установка посудомоечной машины", "unit": "шт", "price": 1000 },
+        { "name": "Установка терморегулятора (тёплый пол)", "unit": "шт", "price": 650 },
+        { "name": "Установка светодиодной ленты", "unit": "м.п.", "price": 250 },
+        { "name": "Установка гардины", "unit": "шт", "price": 300 },
+        { "name": "Установка подвесного светильника", "unit": "шт", "price": 500 },
+        { "name": "Установка настенного светильника", "unit": "шт", "price": 500 }
+      ]
     };
 
     let currentQuantities = {};
 
-    function updateDefaults() {
-      const area = parseFloat(document.getElementById("area").value) || 0;
-      if (area <= 0) return;
+    // Генерация интерфейса
+    function renderWorks() {
+      const area = parseFloat(document.getElementById("area").value) || 50;
+      let html = '';
 
-      const repair = document.getElementById("repairType").value;
+      Object.keys(WORKS_DATA).forEach(section => {
+        html += `<div class="section"><div class="section-title">🧱 ${section}</div><div class="checkbox-group">`;
 
-      // Автоматическое заполнение для капитального ремонта
-      if (repair === "capital") {
-        document.getElementById("qty_plaster_3cm").value = Math.round(area * 0.8); // 80% стен
-        document.getElementById("qty_putty").value = Math.round(area * 0.8);
-        document.getElementById("qty_screed_5cm").value = Math.round(area * 0.9); // 90% пола
-        document.getElementById("qty_laminate").value = Math.round(area * 0.5); // 50% пола
-        document.getElementById("qty_tile_floor").value = Math.round(area * 0.2); // 20% пола (санузел)
-        document.getElementById("qty_cable").value = Math.round(area * 1.5); // 1.5 м.п. на м²
-        document.getElementById("qty_socket").value = Math.round(area * 0.3); // 0.3 шт на м²
-        document.getElementById("qty_lamp").value = Math.round(area / 20); // 1 шт на 20 м²
-        document.getElementById("qty_door").value = 3; // 3 двери
-        document.getElementById("qty_plumbing_pipes").value = Math.round(area * 0.5); // 0.5 м.п. на м²
-        document.getElementById("qty_mixer").value = 2; // 2 смесителя
-        document.getElementById("qty_toilet").value = 1;
-        document.getElementById("qty_shower").value = 1;
-      }
+        WORKS_DATA[section].forEach((item, idx) => {
+          const key = `${section}_${idx}`.replace(/\s+/g, '_').toLowerCase();
+          const isSquare = item.unit === "м²";
+          const qty = isSquare ? Math.round(area * 0.8) : 1;
 
-      // Для косметического — только отделка
-      else if (repair === "cosmetic") {
-        document.getElementById("qty_wallpaper").value = Math.round(area * 0.8);
-        document.getElementById("qty_paint_walls").value = Math.round(area * 0.8);
-        document.getElementById("qty_laminate").value = Math.round(area * 0.9);
-        document.getElementById("qty_socket").value = Math.round(area * 0.2);
-        document.getElementById("qty_lamp").value = Math.round(area / 25);
-        document.getElementById("qty_door").value = 2;
-      }
+          html += `
+            <div class="checkbox-item">
+              <label>
+                <input type="checkbox" id="work_${key}" onchange="toggleWork('${key}', this.checked, ${item.price}, '${item.unit}')">
+                ${item.name}
+              </label>
+              <div class="price-note">${item.price} ₽ / ${item.unit}</div>
+              ${isSquare ? `<input type="number" id="qty_${key}" value="${qty}" min="0" onchange="updateQty('${key}', this.value)">` : ''}
+            </div>
+          `;
+        });
 
-      // Для евро — всё плюс премиум
-      else if (repair === "euro") {
-        document.getElementById("qty_plaster_3cm").value = Math.round(area * 0.9);
-        document.getElementById("qty_putty").value = Math.round(area * 0.9);
-        document.getElementById("qty_screed_5cm").value = Math.round(area * 0.95);
-        document.getElementById("qty_tile_floor").value = Math.round(area * 0.3);
-        document.getElementById("qty_laminate").value = Math.round(area * 0.4);
-        document.getElementById("qty_cable").value = Math.round(area * 2);
-        document.getElementById("qty_socket").value = Math.round(area * 0.4);
-        document.getElementById("qty_lamp").value = Math.round(area / 15);
-        document.getElementById("qty_door").value = 4;
-        document.getElementById("qty_plumbing_pipes").value = Math.round(area * 0.6);
-        document.getElementById("qty_mixer").value = 3;
-        document.getElementById("qty_toilet").value = 2;
-        document.getElementById("qty_shower").value = 2;
-      }
-
-      // Обновляем значения в объекте
-      Object.keys(PRICES).forEach(key => {
-        const qty = parseFloat(document.getElementById(`qty_${key}`).value) || 0;
-        currentQuantities[key] = qty;
+        html += '</div></div>';
       });
 
+      document.getElementById("works").innerHTML = html;
       calculate();
     }
 
-    function toggleWork(key, checked) {
+    function toggleWork(key, checked, price, unit) {
       const qtyInput = document.getElementById(`qty_${key}`);
       if (checked) {
-        if (qtyInput && qtyInput.value == "0") {
-          qtyInput.value = "1";
-          currentQuantities[key] = 1;
-        }
+        const area = parseFloat(document.getElementById("area").value) || 50;
+        const qty = (unit === "м²") ? Math.round(area * 0.8) : 1;
+        currentQuantities[key] = { qty, price, unit };
+        if (qtyInput) qtyInput.value = qty;
       } else {
-        if (qtyInput) qtyInput.value = "0";
-        currentQuantities[key] = 0;
+        currentQuantities[key] = { qty: 0, price, unit };
+        if (qtyInput) qtyInput.value = 0;
       }
       calculate();
     }
 
     function updateQty(key, value) {
-      currentQuantities[key] = parseFloat(value) || 0;
+      const qty = parseFloat(value) || 0;
+      if (currentQuantities[key]) {
+        currentQuantities[key].qty = qty;
+      }
       calculate();
     }
 
     function calculate() {
       let total = 0;
-      let details = [];
-
-      Object.entries(currentQuantities).forEach(([key, qty]) => {
-        if (qty > 0) {
-          const item = PRICES[key];
-          const lineTotal = qty * item.price;
-          total += lineTotal;
-          details.push({
-            name: item.name,
-            qty: qty,
-            unit: item.unit,
-            price: item.price,
-            total: lineTotal
-          });
+      Object.values(currentQuantities).forEach(item => {
+        if (item.qty > 0) {
+          total += item.qty * item.price;
         }
       });
-
       const formatted = new Intl.NumberFormat('ru-RU').format(total);
       document.getElementById("result").innerText = `Итого: ${formatted} ₽`;
-      return { total, details };
     }
 
     function sendData() {
-      const { total, details } = calculate();
-      if (total === 0) {
+      const total = 0;
+      const details = [];
+      Object.entries(currentQuantities).forEach(([key, item]) => {
+        if (item.qty > 0) {
+          // Извлекаем имя из DOM или ключа
+          const label = document.querySelector(`label[for="work_${key}"]`);
+          const name = label ? label.textContent.trim().replace(/\s*\d+ ₽.*$/, '') : key;
+          details.push({ name, qty: item.qty, unit: item.unit, price: item.price, total: item.qty * item.price });
+        }
+      });
+
+      if (details.length === 0) {
         alert("Выберите хотя бы одну работу.");
         return;
       }
 
+      let totalSum = details.reduce((sum, d) => sum + d.total, 0);
       const data = {
         area: parseFloat(document.getElementById("area").value) || 0,
         repairType: document.getElementById("repairType").value,
-        total: total,
+        total: totalSum,
         details: details
       };
 
@@ -455,9 +334,9 @@
     }
 
     // Инициализация
-    document.getElementById("area").addEventListener("change", updateDefaults);
-    document.getElementById("repairType").addEventListener("change", updateDefaults);
-    updateDefaults();
+    document.getElementById("area").addEventListener("input", renderWorks);
+    document.getElementById("repairType").addEventListener("change", renderWorks);
+    renderWorks();
   </script>
 </body>
 </html>
