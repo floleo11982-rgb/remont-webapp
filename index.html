@@ -101,6 +101,26 @@
       color: #666;
       margin-top: 2px;
     }
+    .tab-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 16px 0;
+    }
+    .tab-button {
+      padding: 12px 16px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: center;
+      flex: 1 1 200px;
+      min-width: 120px;
+    }
+    .tab-button.active {
+      background: #0088cc;
+      color: white;
+    }
   </style>
 </head>
 <body>
@@ -117,13 +137,25 @@
       <option value="euro">Евро / Дизайнерский</option>
     </select>
 
+    <div class="tab-buttons">
+      <div class="tab-button active" onclick="showSection('demolition')">🧱 Демонтажные работы</div>
+      <div class="tab-button" onclick="showSection('plastering')">🖌️ Штукатурка и шпаклёвка</div>
+      <div class="tab-button" onclick="showSection('tiling')">🟥 Плитка и покраска</div>
+      <div class="tab-button" onclick="showSection('floor')">🪵 Напольные покрытия</div>
+      <div class="tab-button" onclick="showSection('gypsum')">🧱 Обои и гипсокартон</div>
+      <div class="tab-button" onclick="showSection('sanitary')">🚰 Сантехника</div>
+      <div class="tab-button" onclick="showSection('electrical')">⚡ Электромонтаж</div>
+      <div class="tab-button" onclick="showSection('doors')">🚪 Двери и окна</div>
+      <div class="tab-button" onclick="showSection('other')">🔧 Прочие работы</div>
+    </div>
+
     <div id="works"></div>
 
     <div id="result">Смета появится здесь</div>
 
     <button onclick="sendData()">Отправить смету менеджеру</button>
-    <button class="btn-contact" onclick="callManager()">
-      📞 Связаться с менеджером
+    <button class="btn-contact" onclick="callMaster()">
+      📞 Связаться с мастером
     </button>
   </div>
 
@@ -185,7 +217,7 @@
       ],
       "Сантехнические работы": [
         { "name": "Прокладка труб водоснабжения (металлопластик)", "unit": "м.п.", "price": 70 },
-        { "name": "Прокладка канализационных труб", "unit": "м..p.", "price": 70 },
+        { "name": "Прокладка канализационных труб", "unit": "м.п.", "price": 70 },
         { "name": "Установка смесителя", "unit": "шт", "price": 300 },
         { "name": "Установка унитаза напольного", "unit": "шт", "price": 1000 },
         { "name": "Установка унитаза подвесного", "unit": "шт", "price": 1500 },
@@ -233,17 +265,23 @@
     };
 
     let currentQuantities = {};
+    let activeSection = "Демонтажные работы";
 
-    // Генерация интерфейса
+    function showSection(sectionName) {
+      activeSection = sectionName;
+      renderWorks();
+    }
+
     function renderWorks() {
-      const area = parseFloat(document.getElementById("area").value) || 50;
+      const area = parseFloat(document.getElementById("area").value) || 0;
       let html = '';
 
-      Object.keys(WORKS_DATA).forEach(section => {
-        html += `<div class="section"><div class="section-title">🧱 ${section}</div><div class="checkbox-group">`;
+      // Отображаем только активный раздел
+      if (WORKS_DATA[activeSection]) {
+        html += `<div class="section"><div class="section-title">🧱 ${activeSection}</div><div class="checkbox-group">`;
 
-        WORKS_DATA[section].forEach((item, idx) => {
-          const key = `${section}_${idx}`.replace(/\s+/g, '_').toLowerCase();
+        WORKS_DATA[activeSection].forEach((item, idx) => {
+          const key = `${activeSection}_${idx}`.replace(/\s+/g, '_').toLowerCase();
           const isSquare = item.unit === "м²";
           const qty = isSquare ? Math.round(area * 0.8) : 1;
 
@@ -260,7 +298,7 @@
         });
 
         html += '</div></div>';
-      });
+      }
 
       document.getElementById("works").innerHTML = html;
       calculate();
@@ -300,14 +338,16 @@
     }
 
     function sendData() {
-      const total = 0;
       const details = [];
+      let totalSum = 0;
+
       Object.entries(currentQuantities).forEach(([key, item]) => {
         if (item.qty > 0) {
-          // Извлекаем имя из DOM или ключа
           const label = document.querySelector(`label[for="work_${key}"]`);
           const name = label ? label.textContent.trim().replace(/\s*\d+ ₽.*$/, '') : key;
-          details.push({ name, qty: item.qty, unit: item.unit, price: item.price, total: item.qty * item.price });
+          const lineTotal = item.qty * item.price;
+          details.push(`${item.qty} ${item.unit} × ${item.price} ₽ = ${lineTotal} ₽ — ${name}`);
+          totalSum += lineTotal;
         }
       });
 
@@ -316,20 +356,44 @@
         return;
       }
 
-      let totalSum = details.reduce((sum, d) => sum + d.total, 0);
-      const data = {
-        area: parseFloat(document.getElementById("area").value) || 0,
-        repairType: document.getElementById("repairType").value,
+      // Создание текстового файла
+      const area = document.getElementById("area").value;
+      const repairType = document.getElementById("repairType").value;
+      const date = new Date().toLocaleString('ru-RU');
+
+      const textContent = `
+📌 Смета от ${date}
+🏠 Площадь: ${area} м²
+🔧 Тип ремонта: ${repairType}
+
+📋 Работы:
+${details.join('\n')}
+
+💰 Итого: ${new Intl.NumberFormat('ru-RU').format(totalSum)} ₽
+
+---
+Сохранено автоматически.
+      `;
+
+      const blob = new Blob([textContent], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `смета_${date.replace(/[:\s]/g, '_')}.txt`;
+      a.click();
+
+      // Отправка в Telegram
+      const WebApp = window.Telegram.WebApp;
+      WebApp.sendData(JSON.stringify({
+        area: area,
+        repairType: repairType,
         total: totalSum,
         details: details
-      };
-
-      const WebApp = window.Telegram.WebApp;
-      WebApp.sendData(JSON.stringify(data));
+      }));
       WebApp.close();
     }
 
-    function callManager() {
+    function callMaster() {
       window.Telegram.WebApp.openTelegramLink("https://t.me/grigorii_saveliev");
     }
 
