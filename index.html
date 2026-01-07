@@ -145,17 +145,17 @@
     </select>
 
     <div class="tab-buttons">
-      <div class="tab-button active" onclick="showSection('ceiling')">Монтаж потолков</div>
-      <div class="tab-button" onclick="showSection('walls')">Монтаж стен</div>
-      <div class="tab-button" onclick="showSection('demolition')">Демонтаж стен</div>
-      <div class="tab-button" onclick="showSection('floor')">Монтаж полов</div>
-      <div class="tab-button" onclick="showSection('gypsum')">Работы с гипсокартоном</div>
-      <div class="tab-button" onclick="showSection('kafel')">Монтаж кафеля</div>
-      <div class="tab-button" onclick="showSection('decoration')">Стоимость декоративных работ</div>
-      <div class="tab-button" onclick="showSection('electrical')">Электромонтажные работы</div>
-      <div class="tab-button" onclick="showSection('sanitary')">Монтаж сантехники</div>
-      <div class="tab-button" onclick="showSection('doors')">Монтаж дверных конструкций</div>
-      <div class="tab-button" onclick="showSection('other')">Стоимость прочих работ</div>
+      <div class="tab-button active" onclick="showSection('Монтаж потолков', this)">Монтаж потолков</div>
+      <div class="tab-button" onclick="showSection('Монтаж стен', this)">Монтаж стен</div>
+      <div class="tab-button" onclick="showSection('Демонтаж стен', this)">Демонтаж стен</div>
+      <div class="tab-button" onclick="showSection('Монтаж полов', this)">Монтаж полов</div>
+      <div class="tab-button" onclick="showSection('Работы с гипсокартоном', this)">Работы с гипсокартоном</div>
+      <div class="tab-button" onclick="showSection('Монтаж кафеля', this)">Монтаж кафеля</div>
+      <div class="tab-button" onclick="showSection('Стоимость декоративных работ', this)">Стоимость декоративных работ</div>
+      <div class="tab-button" onclick="showSection('Электромонтажные работы', this)">Электромонтажные работы</div>
+      <div class="tab-button" onclick="showSection('Монтаж сантехники', this)">Монтаж сантехники</div>
+      <div class="tab-button" onclick="showSection('Монтаж дверных конструкций', this)">Монтаж дверных конструкций</div>
+      <div class="tab-button" onclick="showSection('Стоимость прочих работ', this)">Стоимость прочих работ</div>
     </div>
 
     <div id="works"></div>
@@ -275,12 +275,9 @@
     let currentQuantities = {};
     let activeSection = "Монтаж потолков";
 
-    function showSection(sectionName) {
-      // Убираем активный класс со всех кнопок
+    function showSection(sectionName, buttonElement) {
       document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-      // Находим кнопку, по которой кликнули
-      event.target.classList.add('active');
-      // Обновляем текущий раздел
+      buttonElement.classList.add('active');
       activeSection = sectionName;
       renderWorks();
     }
@@ -298,16 +295,15 @@
           const isSquare = item.unit === "м²";
           let qty = 0;
 
-          // Автоматическое заполнение для капитального ремонта
           if (document.getElementById("repairType").value === "capital") {
             if (isSquare) {
-              qty = Math.round(area * 0.8); // 80% площади
+              qty = Math.round(area * 0.8);
             } else if (item.name.includes("дверь")) {
-              qty = parseInt(rooms) + 1; // 1 дверь на комнату + 1 входная
+              qty = parseInt(rooms) + 1;
             } else if (item.name.includes("розетка")) {
-              qty = Math.round(area * 0.3); // 0.3 шт на м²
+              qty = Math.round(area * 0.3);
             } else if (item.name.includes("люстра")) {
-              qty = Math.round(area / 20); // 1 шт на 20 м²
+              qty = Math.round(area / 20);
             } else {
               qty = 1;
             }
@@ -398,7 +394,6 @@
         return;
       }
 
-      // Создание текстового файла
       const area = document.getElementById("area").value;
       const rooms = document.getElementById("rooms").value;
       const repairType = document.getElementById("repairType").value;
@@ -424,7 +419,6 @@ ${details.join('\n')}
       a.download = `смета_${date.replace(/[:\s]/g, '_')}.txt`;
       a.click();
 
-      // Отправка в Telegram
       const WebApp = window.Telegram.WebApp;
       WebApp.sendData(JSON.stringify({
         area: area,
@@ -440,7 +434,6 @@ ${details.join('\n')}
       window.Telegram.WebApp.openTelegramLink("https://t.me/grigorii_saveliev");
     }
 
-    // Инициализация
     document.getElementById("area").addEventListener("input", renderWorks);
     document.getElementById("rooms").addEventListener("change", renderWorks);
     document.getElementById("repairType").addEventListener("change", renderWorks);
