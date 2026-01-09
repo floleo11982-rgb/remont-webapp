@@ -369,7 +369,7 @@
       const isKotedge = document.getElementById("isKotedge").checked;
       const titleEl = document.getElementById("title");
       titleEl.innerText = isKotedge 
-        ? "Приблизительный расчёт ремонта (коттедж)" 
+        ? "Приблизительный расчёт ремонта (коттеджа)" 
         : "Приблизительный расчёт ремонта";
     }
 
@@ -377,6 +377,7 @@
       document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
       buttonElement.classList.add('active');
       activeSection = sectionName;
+      renderWorks();
     }
 
     function renderWorks() {
@@ -386,7 +387,7 @@
 
         WORKS_DATA[activeSection].forEach((item, idx) => {
           const key = `${activeSection}|${idx}`;
-          const qty = 0; // ВСЕГДА 0 при открытии
+          const qty = 0;
           const isChecked = false;
 
           html += `
@@ -506,7 +507,7 @@
     // Инициализация
     document.getElementById("isKotedge").addEventListener("change", updateTitle);
     document.getElementById("repairType").addEventListener("change", () => {});
-    renderWorks(); // Теперь всё чисто
+    renderWorks();
 
     if (window.Telegram && window.Telegram.WebApp) {
         window.Telegram.WebApp.ready();
