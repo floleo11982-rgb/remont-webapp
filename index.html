@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -369,7 +370,7 @@
       const isKotedge = document.getElementById("isKotedge").checked;
       const titleEl = document.getElementById("title");
       titleEl.innerText = isKotedge 
-        ? "Приблизительный расчёт ремонта" 
+        ? "Приблизительный расчёт ремонта (коттедж)" 
         : "Приблизительный расчёт ремонта";
     }
 
@@ -387,9 +388,8 @@
 
         WORKS_DATA[activeSection].forEach((item, idx) => {
           const key = `${activeSection}|${idx}`;
-          const storedItem = currentQuantities[key];
-          const qty = storedItem ? storedItem.qty : 0;
-          const isChecked = qty > 0;
+          const qty = 0; // ВСЕГДА 0 при открытии
+          const isChecked = false;
 
           html += `
             <div class="checkbox-item">
@@ -405,7 +405,7 @@
               
               <div class="qty-input-wrapper">
                 <input type="number" id="qty_${key}" 
-                       value="${qty > 0 ? qty : ''}" 
+                       value="" 
                        placeholder="0"
                        min="0" 
                        step="0.1"
@@ -425,15 +425,11 @@
       const qtyInput = document.getElementById(`qty_${key}`);
       
       if (isChecked) {
-        let val = parseFloat(qtyInput.value) || 0;
-        if (val === 0) val = 1;
-        qtyInput.value = val;
-        currentQuantities[key] = { qty: val, price, unit, name };
+        qtyInput.value = '1';
+        currentQuantities[key] = { qty: 1, price, unit, name };
       } else {
         qtyInput.value = '';
-        if (currentQuantities[key]) {
-            currentQuantities[key].qty = 0;
-        }
+        currentQuantities[key] = { qty: 0, price, unit, name };
       }
       calculate();
     }
@@ -502,19 +498,18 @@
       const WebApp = window.Telegram.WebApp;
       if (WebApp) {
           WebApp.sendData(JSON.stringify(dataToSend));
-      } else {
-          console.log("Данные для отправки:", dataToSend);
       }
     }
 
     function callMaster() {
-      window.open("https://t.me/grigorii_saveliev", "_blank");
+      window.Telegram.WebApp.openTelegramLink("https://t.me/grigorii_saveliev");
     }
 
     // Инициализация
     document.getElementById("isKotedge").addEventListener("change", updateTitle);
-    renderWorks(); // Рендерит пустые поля
-    
+    document.getElementById("repairType").addEventListener("change", () => {});
+    renderWorks(); // Теперь всё чисто
+
     if (window.Telegram && window.Telegram.WebApp) {
         window.Telegram.WebApp.ready();
         window.Telegram.WebApp.expand();
