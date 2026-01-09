@@ -458,8 +458,11 @@
     }
 
     function sendData() {
-      const details = [];
-      let totalSum = 0;
+  // ... сбор данных ...
+  const WebApp = window.Telegram.WebApp;
+  WebApp.sendData(JSON.stringify(dataToSend));
+  WebApp.close();
+}
 
       Object.values(currentQuantities).forEach(item => {
         if (item && item.qty > 0) {
