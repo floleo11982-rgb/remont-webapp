@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Калькулятор ремонта — УютФинал</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script> <!-- УБРАНЫ ПРОБЕЛЫ -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -51,7 +51,6 @@
       background: #fcfcfc;
     }
     
-    /* Стили списка работ */
     .checkbox-group {
       display: flex;
       flex-direction: column;
@@ -232,7 +231,6 @@
   </div>
 
   <script>
-    // База данных цен
     const WORKS_DATA = {
       "Малярные работы": [
         { name: "Подготовка стен под покраску (холст, шпатлёвка, шкурка)", unit: "м²", price: 2170 },
@@ -366,8 +364,7 @@
 
     function updateTitle() {
       const isKotedge = document.getElementById("isKotedge").checked;
-      const titleEl = document.getElementById("title");
-      titleEl.innerText = isKotedge 
+      document.getElementById("title").innerText = isKotedge 
         ? "Приблизительный расчёт ремонта (коттеджа)" 
         : "Приблизительный расчёт ремонта";
     }
@@ -383,30 +380,19 @@
       let html = '';
       if (WORKS_DATA[activeSection]) {
         html += `<div class="checkbox-group">`;
-
         WORKS_DATA[activeSection].forEach((item, idx) => {
           const key = `${activeSection}|${idx}`;
-          const qty = 0;
-          const isChecked = false;
-
           html += `
             <div class="checkbox-item">
               <div class="checkbox-content">
-                <label class="checkbox-row" for="chk_${key}">
-                  <input type="checkbox" id="chk_${key}" 
-                    ${isChecked ? 'checked' : ''} 
-                    onchange="toggleWork('${key}', this.checked, ${item.price}, '${item.unit}', '${item.name.replace(/'/g, "\\'")}')">
+                <label class="checkbox-row">
+                  <input type="checkbox" onchange="toggleWork('${key}', this.checked, ${item.price}, '${item.unit}', '${item.name.replace(/'/g, "\\'")}')">
                   <span class="work-name">${item.name}</span>
                 </label>
                 <div class="price-note">${item.price} ₽ / ${item.unit}</div>
               </div>
-              
               <div class="qty-input-wrapper">
-                <input type="number" id="qty_${key}" 
-                       value="" 
-                       placeholder="0"
-                       min="0" 
-                       step="0.1"
+                <input type="number" min="0" step="0.1" placeholder="0"
                        oninput="updateQty('${key}', this.value, ${item.price}, '${item.unit}', '${item.name.replace(/'/g, "\\'")}')">
                 <span class="unit-label">${item.unit}</span>
               </div>
@@ -420,8 +406,7 @@
     }
 
     function toggleWork(key, isChecked, price, unit, name) {
-      const qtyInput = document.getElementById(`qty_${key}`);
-      
+      const qtyInput = document.querySelector(`input[oninput*="${key}"]`);
       if (isChecked) {
         qtyInput.value = '1';
         currentQuantities[key] = { qty: 1, price, unit, name };
@@ -433,83 +418,57 @@
     }
 
     function updateQty(key, value, price, unit, name) {
-      let qty = parseFloat(value);
-      if (isNaN(qty) || qty < 0) qty = 0;
-
+      let qty = parseFloat(value) || 0;
       currentQuantities[key] = { qty, price, unit, name };
-
-      const checkbox = document.getElementById(`chk_${key}`);
-      if (checkbox) {
-        checkbox.checked = (qty > 0);
-      }
+      const checkbox = document.querySelector(`input[onchange*="${key}"]`);
+      if (checkbox) checkbox.checked = (qty > 0);
       calculate();
     }
 
     function calculate() {
       let total = 0;
-      Object.values(currentQuantities).forEach(item => {
-        if (item && item.qty > 0) {
-          total += item.qty * item.price;
-        }
-      });
-      const formatted = new Intl.NumberFormat('ru-RU').format(Math.round(total));
-      document.getElementById("result").innerText = `Итого: ${formatted} ₽`;
+      for (const item of Object.values(currentQuantities)) {
+        if (item.qty > 0) total += item.qty * item.price;
+      }
+      document.getElementById("result").innerText = `Итого: ${Math.round(total).toLocaleString('ru-RU')} ₽`;
     }
 
     function sendData() {
       const details = [];
       let totalSum = 0;
-
-      Object.values(currentQuantities).forEach(item => {
-        if (item && item.qty > 0) {
+      for (const item of Object.values(currentQuantities)) {
+        if (item.qty > 0) {
           const lineTotal = Math.round(item.qty * item.price);
           details.push(`${item.qty} ${item.unit} × ${item.price} ₽ = ${lineTotal} ₽ — ${item.name}`);
           totalSum += lineTotal;
         }
-      });
+      }
 
       if (details.length === 0) {
-        alert("Пожалуйста, выберите работы для расчета.");
+        alert("Выберите хотя бы одну работу.");
         return;
       }
 
-      const area = document.getElementById("area").value;
-      const rooms = document.getElementById("rooms").value;
-      const repairType = document.getElementById("repairType").value;
-      const isKotedge = document.getElementById("isKotedge").checked;
-      
-      const typeLabel = {
-          'cosmetic': 'Косметический',
-          'capital': 'Капитальный',
-          'euro': 'Евро/Дизайн'
-      }[repairType];
-
       const dataToSend = {
-        area: area || "Не указана",
-        rooms: rooms,
-        repairType: typeLabel,
-        isKotedge: isKotedge ? 'Да' : 'Нет',
+        area: document.getElementById("area").value || "—",
+        rooms: document.getElementById("rooms").value,
+        repairType: document.getElementById("repairType").options[document.getElementById("repairType").selectedIndex].text,
+        isKotedge: document.getElementById("isKotedge").checked ? "Да" : "Нет",
         total: totalSum,
         details: details
       };
 
-      // === КРИТИЧЕСКИ ВАЖНО: ИНИЦИАЛИЗАЦИЯ WEBAPP ===
-      if (window.Telegram && window.Telegram.WebApp) {
-        window.Telegram.WebApp.ready();
-        window.Telegram.WebApp.sendData(JSON.stringify(dataToSend));
-        window.Telegram.WebApp.close();
-      } else {
-        alert("Ошибка: Telegram WebApp не доступен.");
-      }
+      // === КЛЮЧЕВОЕ: ИНИЦИАЛИЗАЦИЯ + ОТПРАВКА БЕЗ close() ===
+      const WebApp = window.Telegram.WebApp;
+      WebApp.ready();
+      WebApp.sendData(JSON.stringify(dataToSend));
+      // НЕ вызываем WebApp.close() — Telegram сам закроет после ответа
     }
 
     function callMaster() {
-      if (window.Telegram && window.Telegram.WebApp) {
-        window.Telegram.WebApp.openTelegramLink("https://t.me/grigorii_saveliev");
-      }
+      window.Telegram.WebApp.openTelegramLink("https://t.me/grigorii_saveliev");
     }
 
-    // Инициализация
     document.getElementById("isKotedge").addEventListener("change", updateTitle);
     renderWorks();
   </script>
