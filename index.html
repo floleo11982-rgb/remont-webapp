@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -52,7 +51,6 @@
       background: #fcfcfc;
     }
     
-    /* Стили списка работ */
     .checkbox-group {
       display: flex;
       flex-direction: column;
@@ -183,7 +181,6 @@
   <div class="card">
     <h2 id="title">Приблизительный расчёт ремонта</h2>
 
-    <!-- Поля ввода информации (не влияют на расчет) -->
     <label>Площадь квартиры (м²):</label>
     <input type="number" id="area" placeholder="0" min="0">
 
@@ -370,7 +367,7 @@
       const isKotedge = document.getElementById("isKotedge").checked;
       const titleEl = document.getElementById("title");
       titleEl.innerText = isKotedge 
-        ? "Приблизительный расчёт ремонта (коттедж)" 
+        ? "Приблизительный расчёт ремонта (коттеджа)" 
         : "Приблизительный расчёт ремонта";
     }
 
@@ -388,7 +385,7 @@
 
         WORKS_DATA[activeSection].forEach((item, idx) => {
           const key = `${activeSection}|${idx}`;
-          const qty = 0; // ВСЕГДА 0 при открытии
+          const qty = 0;
           const isChecked = false;
 
           html += `
@@ -487,7 +484,7 @@
       }[repairType];
 
       const dataToSend = {
-        area: area || "Не указана",
+        area: area || "—",
         rooms: rooms,
         repairType: typeLabel,
         isKotedge: isKotedge ? 'Да' : 'Нет',
@@ -496,9 +493,9 @@
       };
 
       const WebApp = window.Telegram.WebApp;
-      if (WebApp) {
-          WebApp.sendData(JSON.stringify(dataToSend));
-      }
+      WebApp.ready();
+      WebApp.sendData(JSON.stringify(dataToSend));
+      // Не вызываем close() — Telegram сам закроет после ответа
     }
 
     function callMaster() {
@@ -507,13 +504,7 @@
 
     // Инициализация
     document.getElementById("isKotedge").addEventListener("change", updateTitle);
-    document.getElementById("repairType").addEventListener("change", () => {});
-    renderWorks(); // Теперь всё чисто
-
-    if (window.Telegram && window.Telegram.WebApp) {
-        window.Telegram.WebApp.ready();
-        window.Telegram.WebApp.expand();
-    }
+    renderWorks();
   </script>
 </body>
 </html>
