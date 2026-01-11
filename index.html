@@ -456,15 +456,12 @@
     }
 
     function sendData() {
-      const details = [];
-      let totalSum = 0;
+  // ... сбор данных ...
 
-      Object.values(currentQuantities).forEach(item => {
-        if (item && item.qty > 0) {
-          const lineTotal = Math.round(item.qty * item.price);
-          details.push(`${item.qty} ${item.unit} × ${item.price} ₽ = ${lineTotal} ₽ — ${item.name}`);
-          totalSum += lineTotal;
-        }
+  const WebApp = window.Telegram.WebApp;
+  WebApp.ready(); // ← обязательно
+  WebApp.sendData(JSON.stringify(dataToSend)); // ← без .close()
+}
       });
 
       if (details.length === 0) {
