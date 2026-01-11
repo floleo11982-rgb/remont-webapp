@@ -495,14 +495,12 @@
       const WebApp = window.Telegram.WebApp;
       WebApp.ready();
       WebApp.sendData(JSON.stringify(dataToSend));
-      // Не вызываем close() — Telegram сам закроет после ответа
     }
 
     function callMaster() {
       window.Telegram.WebApp.openTelegramLink("https://t.me/grigorii_saveliev");
     }
 
-    // Инициализация
     document.getElementById("isKotedge").addEventListener("change", updateTitle);
     renderWorks();
   </script>
