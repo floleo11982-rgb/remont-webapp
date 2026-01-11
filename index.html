@@ -231,7 +231,6 @@
   </div>
 
   <script>
-    // База данных цен
     const WORKS_DATA = {
       "Малярные работы": [
         { name: "Подготовка стен под покраску (холст, шпатлёвка, шкурка)", unit: "м²", price: 2170 },
@@ -296,7 +295,7 @@
         { name: "Монтаж подрозетников в монолит", unit: "шт", price: 650 },
         { name: "Монтаж подрозетников в кирпич", unit: "шт", price: 450 },
         { name: "Монтаж кабель-канала", unit: "м.п.", price: 100 },
-        { name: "Монтаж гофры для кабеля", unit: "м.п.", price: 90 },
+        { name: "Монтаж гофры для кабеля", unit: "м. p.", price: 90 },
         { name: "Монтаж вытяжки", unit: "шт", price: 2500 },
         { name: "Монтаж вентиляции", unit: "шт", price: 1380 }
       ],
@@ -385,27 +384,18 @@
 
         WORKS_DATA[activeSection].forEach((item, idx) => {
           const key = `${activeSection}|${idx}`;
-          const qty = 0;
-          const isChecked = false;
-
           html += `
             <div class="checkbox-item">
               <div class="checkbox-content">
-                <label class="checkbox-row" for="chk_${key}">
-                  <input type="checkbox" id="chk_${key}" 
-                    ${isChecked ? 'checked' : ''} 
-                    onchange="toggleWork('${key}', this.checked, ${item.price}, '${item.unit}', '${item.name.replace(/'/g, "\\'")}')">
+                <label class="checkbox-row">
+                  <input type="checkbox" onchange="toggleWork('${key}', this.checked, ${item.price}, '${item.unit}', '${item.name.replace(/'/g, "\\'")}')">
                   <span class="work-name">${item.name}</span>
                 </label>
                 <div class="price-note">${item.price} ₽ / ${item.unit}</div>
               </div>
               
               <div class="qty-input-wrapper">
-                <input type="number" id="qty_${key}" 
-                       value="" 
-                       placeholder="0"
-                       min="0" 
-                       step="0.1"
+                <input type="number" min="0" step="1" value="0"
                        oninput="updateQty('${key}', this.value, ${item.price}, '${item.unit}', '${item.name.replace(/'/g, "\\'")}')">
                 <span class="unit-label">${item.unit}</span>
               </div>
@@ -419,72 +409,59 @@
     }
 
     function toggleWork(key, isChecked, price, unit, name) {
-      const qtyInput = document.getElementById(`qty_${key}`);
-      
+      const qtyInput = document.querySelector(`input[oninput*="${key}"]`);
       if (isChecked) {
         qtyInput.value = '1';
         currentQuantities[key] = { qty: 1, price, unit, name };
       } else {
-        qtyInput.value = '';
+        qtyInput.value = '0';
         currentQuantities[key] = { qty: 0, price, unit, name };
       }
       calculate();
     }
 
     function updateQty(key, value, price, unit, name) {
-      let qty = parseFloat(value);
-      if (isNaN(qty) || qty < 0) qty = 0;
-
+      let qty = parseInt(value) || 0;
       currentQuantities[key] = { qty, price, unit, name };
-
-      const checkbox = document.getElementById(`chk_${key}`);
-      if (checkbox) {
-        checkbox.checked = (qty > 0);
-      }
+      const checkbox = document.querySelector(`input[onchange*="${key}"]`);
+      if (checkbox) checkbox.checked = (qty > 0);
       calculate();
     }
 
     function calculate() {
       let total = 0;
-      Object.values(currentQuantities).forEach(item => {
-        if (item && item.qty > 0) {
-          total += item.qty * item.price;
-        }
-      });
-      const formatted = new Intl.NumberFormat('ru-RU').format(Math.round(total));
-      document.getElementById("result").innerText = `Итого: ${formatted} ₽`;
+      for (const item of Object.values(currentQuantities)) {
+        if (item.qty > 0) total += item.qty * item.price;
+      }
+      document.getElementById("result").innerText = `Итого: ${Math.round(total).toLocaleString('ru-RU')} ₽`;
     }
 
     function sendData() {
-  // ... сбор данных ...
-
-  const WebApp = window.Telegram.WebApp;
-  WebApp.ready(); // ← обязательно
-  WebApp.sendData(JSON.stringify(dataToSend)); // ← без .close()
-}
-      });
+      const details = [];
+      let totalSum = 0;
+      for (const item of Object.values(currentQuantities)) {
+        if (item.qty > 0) {
+          const lineTotal = Math.round(item.qty * item.price);
+          details.push(`${item.qty} ${item.unit} × ${item.price} ₽ = ${lineTotal} ₽ — ${item.name}`);
+          totalSum += lineTotal;
+        }
+      }
 
       if (details.length === 0) {
         alert("Пожалуйста, выберите работы для расчета.");
         return;
       }
 
-      const area = document.getElementById("area").value;
+      const area = document.getElementById("area").value || "—";
       const rooms = document.getElementById("rooms").value;
-      const repairType = document.getElementById("repairType").value;
-      const isKotedge = document.getElementById("isKotedge").checked;
-      
-      const typeLabel = {
-          'cosmetic': 'Косметический',
-          'capital': 'Капитальный',
-          'euro': 'Евро/Дизайн'
-      }[repairType];
+      const repairType = document.getElementById("repairType").options[document.getElementById("repairType").selectedIndex].text;
+      const isKotedge = document.getElementById("isKotedge").checked ? "Да" : "Нет";
 
       const dataToSend = {
-        area: area || "—",
+        area: area,
         rooms: rooms,
-        repairType: typeLabel,
-        isKotedge: isKotedge ? 'Да' : 'Нет',
+        repairType: repairType,
+        isKotedge: isKotedge,
         total: totalSum,
         details: details
       };
