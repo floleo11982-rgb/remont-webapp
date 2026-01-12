@@ -2,93 +2,123 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Калькулятор ремонта</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест Сметы (DEBUG)</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: sans-serif; padding: 20px; background: #f5f5f5; }
-        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        input, select, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
-        button { background: #d35400; color: white; border: none; font-weight: bold; cursor: pointer; font-size: 16px; }
-        .row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding: 10px 0; }
-        h2 { text-align: center; color: #333; }
-        #total { text-align: center; font-size: 24px; font-weight: bold; color: #d35400; margin: 20px 0; }
+        body { font-family: sans-serif; padding: 20px; background-color: #f5f5f5; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box;}
+        button { width: 100%; padding: 20px; background: #d35400; color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; }
+        button:active { background: #a04000; transform: scale(0.98); } /* Эффект нажатия */
+        .item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2>Тест сметы</h2>
+    <h2>ДИАГНОСТИКА</h2>
+    <p style="color:red; font-size: 12px;">Если всплывающих окон нет — скрипт сломан.</p>
     
-    <label>Площадь (м²)</label>
-    <input type="number" id="area" value="50" oninput="calc()">
-
-    <label>Комнаты</label>
-    <select id="rooms">
-        <option value="1">1-комнатная</option>
-        <option value="2">2-комнатная</option>
-    </select>
+    <label>Площадь (м²):</label>
+    <input type="number" id="area" value="50">
 
     <h3>Работы:</h3>
-    <div class="row">
-        <span>Шпатлевка (470р)</span>
-        <input type="checkbox" id="work1" onchange="calc()">
-    </div>
-    <div class="row">
-        <span>Покраска (450р)</span>
-        <input type="checkbox" id="work2" onchange="calc()">
-    </div>
+    <div id="list"></div>
 
-    <div id="total">0 ₽</div>
-    <button onclick="sendData()">📤 ОТПРАВИТЬ СМЕТУ</button>
+    <h3 id="total">Итого: 0 ₽</h3>
+
+    <button onclick="debugSend()">🚀 ОТПРАВИТЬ (ТЕСТ)</button>
+    <br><br>
+    <button onclick="window.location.reload()" style="background: #7f8c8d;">🔄 Обновить страницу</button>
 </div>
 
 <script>
-    const tg = window.Telegram.WebApp;
-    tg.ready();
-    tg.expand();
+    // 1. Проверяем, загрузился ли скрипт Телеграма
+    let tg;
+    try {
+        tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+        // alert("✅ Телеграм подключен"); // Можно раскомментировать, если совсем всё глухо
+    } catch (e) {
+        alert("❌ Ошибка инициализации TG: " + e.message);
+    }
+
+    // Данные
+    const SERVICES = [
+        { name: "Штукатурка", price: 900 },
+        { name: "Стяжка", price: 600 }
+    ];
+    let cart = {};
+
+    // Отрисовка
+    const listEl = document.getElementById('list');
+    SERVICES.forEach((service) => {
+        const div = document.createElement('div');
+        div.className = 'item';
+        div.innerHTML = `
+            <span>${service.name} (${service.price}₽)</span>
+            <input type="checkbox" onchange="toggle('${service.name}', ${service.price}, this.checked)">
+        `;
+        listEl.appendChild(div);
+    });
+
+    function toggle(name, price, checked) {
+        if (checked) cart[name] = price;
+        else delete cart[name];
+        calc();
+    }
 
     function calc() {
         let sum = 0;
-        const area = document.getElementById('area').value || 0;
-        
-        // Простая логика для теста
-        if(document.getElementById('work1').checked) sum += 470 * area;
-        if(document.getElementById('work2').checked) sum += 450 * area;
-
-        document.getElementById('total').innerText = sum + " ₽";
-        return sum;
+        Object.values(cart).forEach(p => sum += p);
+        document.getElementById('total').innerText = `Итого: ${sum} ₽`;
     }
 
-    function sendData() {
-        const area = document.getElementById('area').value;
-        const total = document.getElementById('total').innerText;
-        
-        // Собираем список работ
-        let items = [];
-        if(document.getElementById('work1').checked) {
-            items.push({name: "Шпатлевка", price: 470, qty: area, unit: "м2"});
-        }
-        if(document.getElementById('work2').checked) {
-            items.push({name: "Покраска", price: 450, qty: area, unit: "м2"});
-        }
+    // --- ФУНКЦИЯ С ДИАГНОСТИКОЙ ---
+    function debugSend() {
+        alert("1️⃣ Кнопка нажата! Начинаем сборку...");
 
-        if(items.length === 0) {
-            tg.showPopup({title: 'Ошибка', message: 'Выберите хотя бы одну работу'});
-            return;
+        try {
+            const area = document.getElementById('area').value;
+            let items = [];
+            let totalSum = 0;
+
+            for (let [name, price] of Object.entries(cart)) {
+                items.push({ name: name, qty: 1, line_sum: price });
+                totalSum += price;
+            }
+
+            // Проверка на пустоту
+            if (items.length === 0) {
+                alert("⚠️ Выберите хотя бы одну галочку!");
+                return;
+            }
+
+            alert("2️⃣ Данные собраны. Сумма: " + totalSum);
+
+            const dataToSend = {
+                area: area,
+                total: totalSum + " ₽",
+                items: items
+            };
+            
+            const jsonString = JSON.stringify(dataToSend);
+            alert("3️⃣ JSON готов. Отправляем в TG...");
+
+            // Самый важный момент
+            if (!tg) {
+                alert("❌ ОШИБКА: Объект 'tg' не найден. Вы открыли это в браузере?");
+                return;
+            }
+            
+            tg.sendData(jsonString);
+            alert("4️⃣ sendData выполнена! Окно должно закрыться.");
+
+        } catch (error) {
+            alert("🔥 КРИТИЧЕСКАЯ ОШИБКА JS:\n" + error.message);
         }
-
-        // Структура JSON для Python
-        const data = {
-            area: area,
-            rooms: document.getElementById('rooms').value,
-            repair: "Тестовый расчет",
-            total: total,
-            items: items
-        };
-
-        // Отправка
-        tg.sendData(JSON.stringify(data));
     }
 </script>
 
