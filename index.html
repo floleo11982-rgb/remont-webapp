@@ -323,10 +323,13 @@
       const details = [];
       let totalSum = 0;
 
+      // ВОТ ТУТ ГЛАВНОЕ ИЗМЕНЕНИЕ ДЛЯ ТЕБЯ:
+      // Мы меняем формат строки, чтобы ты видел: "Работа: объем (цена)"
       Object.values(currentQuantities).forEach(item => {
         if (item && item.qty > 0) {
           const lineTotal = Math.round(item.qty * item.price);
-          details.push(`${item.qty} ${item.unit} × ${item.price} ₽ = ${lineTotal} ₽ — ${item.name}`);
+          // Новый понятный формат:
+          details.push(`${item.name}: ${item.qty} ${item.unit} (по ${item.price}₽) = ${lineTotal}₽`);
           totalSum += lineTotal;
         }
       });
@@ -361,7 +364,7 @@
         repairType: typeLabel,
         isKotedge: isKotedge ? 'Да' : 'Нет',
         total: totalSum,
-        details: details
+        details: details // Теперь тут правильный список
       };
       
       tg.sendData(JSON.stringify(dataToSend));
@@ -371,6 +374,7 @@
       window.Telegram.WebApp.openTelegramLink("https://t.me/grigorii_saveliev");
     }
 
+    // Инициализация
     document.getElementById("isKotedge").addEventListener("change", updateTitle);
     renderWorks();
   </script>
