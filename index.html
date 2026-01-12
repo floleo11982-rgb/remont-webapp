@@ -12,7 +12,7 @@
     .card { background: var(--card-bg); border-radius: 20px; padding: 24px; margin: 12px 0; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
     h2 { font-size: 22px; margin: 0 0 20px; color: var(--secondary); text-align: center; }
     label { display: block; margin: 14px 0 8px; font-weight: 600; font-size: 16px; }
-    input[type="number"], input[type="text"], select { width: 100%; padding: 14px; border: 1px solid #e0e0e0; border-radius: 12px; font-size: 16px; box-sizing: border-box; background: #fcfcfc; }
+    input[type="number"], input[type="text"], input[type="tel"], select { width: 100%; padding: 14px; border: 1px solid #e0e0e0; border-radius: 12px; font-size: 16px; box-sizing: border-box; background: #fcfcfc; }
     
     .checkbox-group { display: flex; flex-direction: column; gap: 16px; margin-top: 10px; }
     .checkbox-item { display: grid; grid-template-columns: 1fr 90px; gap: 10px; align-items: center; padding-bottom: 12px; border-bottom: 1px solid #f0f0f0; }
@@ -83,6 +83,9 @@
     <div id="works"></div>
 
     <div id="result">Итого: 0 ₽</div>
+
+    <label style="color: #d35400;">Ваш телефон (для связи):</label>
+    <input type="tel" id="phone" placeholder="+7 (999) 000-00-00" style="margin-bottom: 10px; border: 2px solid #d35400;">
 
     <button onclick="sendData()">Отправить смету менеджеру</button>
     <button class="btn-contact" onclick="callMaster()">Связаться с мастером</button>
@@ -333,6 +336,13 @@
         return;
       }
 
+      // ПРОВЕРКА ТЕЛЕФОНА
+      const phone = document.getElementById("phone").value;
+      if (!phone || phone.length < 10) {
+          alert("Пожалуйста, введите корректный номер телефона!");
+          return;
+      }
+
       const area = document.getElementById("area").value;
       const rooms = document.getElementById("rooms").value;
       const repairType = document.getElementById("repairType").value;
@@ -345,6 +355,7 @@
       }[repairType] || repairType;
 
       const dataToSend = {
+        phone: phone, // Добавили телефон
         area: area || "Не указана",
         rooms: rooms,
         repairType: typeLabel,
