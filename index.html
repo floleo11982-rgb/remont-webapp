@@ -48,6 +48,9 @@
     <div id="works"></div>
     <div id="result">0 ₽</div>
 
+    <label>Адрес объекта:</label>
+    <input type="text" id="address" placeholder="Улица, дом, квартира" style="border: 1px solid #ddd;">
+
     <label style="color: #d35400;">Телефон (обязательно):</label>
     <input type="tel" id="phone" placeholder="+7 (999) 000-00-00" style="border: 2px solid #d35400; background: #fff8e1;">
 
@@ -84,7 +87,6 @@
     let currentQuantities = {};
     let activeSection = SECTION_ORDER[0];
 
-    // Генерация табов
     const tabsContainer = document.getElementById("tabs");
     SECTION_ORDER.forEach(secName => {
         const btn = document.createElement("div");
@@ -163,7 +165,6 @@
     }
 
     function sendData() {
-        // === СЖАТИЕ В JSON (ИНДЕКСЫ) ===
         const packed = [];
         let totalSum = 0;
 
@@ -172,7 +173,7 @@
                 const key = `${secName}|${itemIdx}`;
                 const sel = currentQuantities[key];
                 if(sel && sel.qty > 0) {
-                    packed.push([secIdx, itemIdx, sel.qty]); // ЦИФРЫ
+                    packed.push([secIdx, itemIdx, sel.qty]);
                     totalSum += Math.round(sel.qty * item.price);
                 }
             });
@@ -189,14 +190,17 @@
             return;
         }
 
+        const address = document.getElementById("address").value || "Не указан";
+
         const data = {
             ph: phone,
+            addr: address,
             ar: document.getElementById("area").value,
             rm: document.getElementById("rooms").value,
             tp: document.getElementById("repairType").value,
             kt: document.getElementById("isKotedge").checked ? 1 : 0,
             tt: totalSum,
-            pk: packed // Отправляем массив цифр
+            pk: packed
         };
 
         try {
