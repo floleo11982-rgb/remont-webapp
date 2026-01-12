@@ -162,24 +162,25 @@
     }
 
     function sendToBot() {
-      if (Object.keys(cart).length === 0) {
-        tg.showPopup({title: 'Ошибка', message: 'Выберите хотя бы одну работу', buttons: [{type: 'ok'}]});
-        return;
-      }
-      
-      const payload = {
-        type: 'estimate',
+    // ... проверки на пустоту ...
+
+    const payload = {
         area: document.getElementById('area').value,
         rooms: document.getElementById('rooms').value,
-        kotedge: document.getElementById('isKotedge').checked,
-        repair: document.getElementById('repairType').value,
-        items: Object.values(cart),
+        // Важно: в Python мы ждем 'items', убедись что тут тоже 'items'
+        items: Object.values(cart), 
         total: document.getElementById('result').innerText
-      };
+    };
 
-      tg.sendData(JSON.stringify(payload));
-      // Окно не закрываем сразу, пусть пользователь увидит реакцию бота, или можно tg.close()
-    }
+    // Для отладки (если открываешь в браузере с консолью F12)
+    console.log("Отправляем:", payload); 
+
+    // ОТПРАВКА
+    tg.sendData(JSON.stringify(payload));
+    
+    // ВАЖНО: Не закрывай окно сразу, дай телеграму секунду на отправку
+    // tg.close(); <--- ЗАКОММЕНТИРУЙ ЭТУ СТРОКУ пока тестируешь
+}
 
     // Инициализация
     render();
