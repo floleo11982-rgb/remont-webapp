@@ -96,7 +96,7 @@
     tg.ready();
     tg.expand();
 
-    // ТВОЯ ПОЛНАЯ БАЗА ДАННЫХ
+    // БАЗА ДАННЫХ В JS
     const WORKS_DATA = {
       "Малярные работы": [
         { name: "Подготовка стен под покраску (холст, шпатлёвка, шкурка)", unit: "м²", price: 2170 },
@@ -306,21 +306,31 @@
       document.getElementById("result").innerText = `Итого: ${formatted} ₽`;
     }
 
-    // === ГЛАВНОЕ ИСПРАВЛЕНИЕ ЗДЕСЬ ===
     function sendData() {
-      const details = []; // Теперь это массив МАССИВОВ, а не длинных строк
+      // === УМНОЕ СЖАТИЕ ДАННЫХ ===
+      // Мы не отправляем названия работ, только индексы!
+      const packedDetails = [];
       let totalSum = 0;
 
-      Object.values(currentQuantities).forEach(item => {
-        if (item && item.qty > 0) {
-          totalSum += Math.round(item.qty * item.price);
-          // Отправляем компактные данные: [Имя, Кол-во, Ед.изм., Цена]
-          // Это занимает в 5 раз меньше места, чем строка.
-          details.push([item.name, item.qty, item.unit, item.price]);
-        }
+      // Проходим по каждому разделу
+      Object.keys(WORKS_DATA).forEach(sectionName => {
+        // Проходим по работам в разделе
+        WORKS_DATA[sectionName].forEach((item, index) => {
+          const key = `${sectionName}|${index}`;
+          const userSelection = currentQuantities[key];
+          
+          if (userSelection && userSelection.qty > 0) {
+             const lineTotal = Math.round(userSelection.qty * item.price);
+             totalSum += lineTotal;
+             
+             // ОТПРАВЛЯЕМ: [ИмяРаздела, ИндексРаботы, Кол-во]
+             // Это очень короткая строка, которая не зависнет!
+             packedDetails.push([sectionName, index, userSelection.qty]);
+          }
+        });
       });
 
-      if (details.length === 0) {
+      if (packedDetails.length === 0) {
         tg.showPopup({message: "Пожалуйста, выберите работы для расчета."});
         return;
       }
@@ -349,7 +359,8 @@
         repairType: typeLabel,
         isKotedge: isKotedge ? 'Да' : 'Нет',
         total: totalSum,
-        details: details // Теперь это легкий список
+        // Отправляем СЖАТЫЙ список
+        packed: packedDetails
       };
       
       tg.sendData(JSON.stringify(dataToSend));
