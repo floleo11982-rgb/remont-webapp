@@ -60,7 +60,6 @@
     tg.ready();
     tg.expand();
 
-    // ПОРЯДОК РАЗДЕЛОВ ВАЖЕН! Он должен совпадать с Python скриптом
     const SECTION_ORDER = [
         "Малярные работы", "Штукатурные работы", "Плиточные работы", 
         "Сантехнические работы", "Электромонтажные работы", "Демонтаж", 
@@ -69,131 +68,17 @@
     ];
 
     const WORKS_DATA = {
-      "Малярные работы": [
-        { name: "Подготовка стен (холст, шпатлёвка)", unit: "м²", price: 2170 },
-        { name: "Покраска стен (2 слоя)", unit: "м²", price: 450 },
-        { name: "Обои без подбора", unit: "м²", price: 420 },
-        { name: "Шпатлёвка под обои", unit: "м²", price: 470 },
-        { name: "Грунтовка стен", unit: "м²", price: 120 },
-        { name: "Шлифовка стен", unit: "м²", price: 172 },
-        { name: "Подготовка комнаты", unit: "м²", price: 110 }
-      ],
-      "Штукатурные работы": [
-        { name: "Штукатурка по маякам", unit: "м²", price: 970 },
-        { name: "Штукатурка гипсовая", unit: "м²", price: 950 },
-        { name: "Заделка штроб", unit: "м.п.", price: 460 },
-        { name: "Штукатурка под багет", unit: "м.п.", price: 150 },
-        { name: "Установка перфоуголка", unit: "м.п.", price: 250 },
-        { name: "Фальш стены", unit: "м²", price: 700 }
-      ],
-      "Плиточные работы": [
-        { name: "Укладка керамогранита 120×60", unit: "м²", price: 3700 },
-        { name: "Укладка плитки 60×60", unit: "м²", price: 3000 },
-        { name: "Запил под 45°", unit: "м.п.", price: 1900 },
-        { name: "Сверление отверстий", unit: "шт", price: 1000 },
-        { name: "Затирка эпоксидная", unit: "м²", price: 1200 },
-        { name: "Затирка цементная", unit: "м²", price: 350 },
-        { name: "Скрытый люк", unit: "от", price: 4700 },
-        { name: "Полки из керамогранита", unit: "от", price: 5000 },
-        { name: "Фигурный рез", unit: "м.п.", price: 1400 },
-        { name: "Фартук", unit: "от", price: 12000 }
-      ],
-      "Сантехнические работы": [
-        { name: "Душевая кабина", unit: "шт", price: 8500 },
-        { name: "Ванна", unit: "шт", price: 12000 },
-        { name: "Унитаз", unit: "шт", price: 4450 },
-        { name: "Раковина с тумбой", unit: "шт", price: 4000 },
-        { name: "Смеситель", unit: "шт", price: 2700 },
-        { name: "Полотенцесушитель", unit: "шт", price: 4000 },
-        { name: "Водонагреватель", unit: "шт", price: 4000 },
-        { name: "Стиральная машина", unit: "шт", price: 3000 },
-        { name: "Система НЕПТУН", unit: "от", price: 20000 },
-        { name: "Перенос туалета", unit: "шт", price: 5000 },
-        { name: "Гидроизоляц. лента", unit: "м.п.", price: 402 },
-        { name: "Гигиенический душ", unit: "шт", price: 2500 },
-        { name: "Душевая лейка", unit: "шт", price: 3000 },
-        { name: "Краны", unit: "шт", price: 460 },
-        { name: "Инсталяция", unit: "от", price: 15000 },
-        { name: "Экран под ванну", unit: "от", price: 12000 },
-        { name: "Бойлер", unit: "шт", price: 4000 }
-      ],
-      "Электромонтажные работы": [
-        { name: "Электрощит", unit: "от", price: 30000 },
-        { name: "Кабель 3×2,5", unit: "м.п.", price: 150 },
-        { name: "Кабель 3×1,5", unit: "м.п.", price: 120 },
-        { name: "Кабель 3×6", unit: "м.п.", price: 300 },
-        { name: "Штробление (бетон)", unit: "м.п.", price: 700 },
-        { name: "Штробление (кирпич)", unit: "м.п.", price: 250 },
-        { name: "Розетки / выключатели", unit: "шт", price: 390 },
-        { name: "LED лента", unit: "м.п.", price: 350 },
-        { name: "Терморегулятор", unit: "шт", price: 650 },
-        { name: "Приток воздуха", unit: "шт", price: 850 },
-        { name: "Распаечная коробка", unit: "шт", price: 1500 },
-        { name: "Подрозетник (монолит)", unit: "шт", price: 650 },
-        { name: "Подрозетник (кирпич)", unit: "шт", price: 450 },
-        { name: "Кабель-канал", unit: "м.п.", price: 100 },
-        { name: "Гофра", unit: "м.п.", price: 90 },
-        { name: "Вытяжка", unit: "шт", price: 2500 },
-        { name: "Вентиляция", unit: "шт", price: 1380 }
-      ],
-      "Демонтаж": [
-        { name: "Очистка стен", unit: "м²", price: 1000 },
-        { name: "Демонтаж штукатурки", unit: "м²", price: 550 },
-        { name: "Демонтаж плитки", unit: "м²", price: 500 },
-        { name: "Демонтаж кирпича", unit: "м²", price: 3100 },
-        { name: "Демонтаж ГКЛ", unit: "м²", price: 250 },
-        { name: "Пробивка проёма (бетон)", unit: "шт", price: 15000 },
-        { name: "Пробивка проёма (кирпич)", unit: "шт", price: 8000 },
-        { name: "Демонтаж откосов", unit: "м.п.", price: 600 }
-      ],
-      "Устройство полов": [
-        { name: "Кварцвинил", unit: "м²", price: 1380 },
-        { name: "Паркетная доска", unit: "м²", price: 3500 },
-        { name: "Стяжка (до 5 см)", unit: "м²", price: 1000 },
-        { name: "Самовыравнивающаяся", unit: "м²", price: 850 },
-        { name: "Плинтус", unit: "м.п.", price: 850 },
-        { name: "Порожек", unit: "м.п.", price: 400 },
-        { name: "Стыковка покрытий", unit: "шт", price: 5000 },
-        { name: "Тёплый пол", unit: "м²", price: 3500 },
-        { name: "Гидроизоляция", unit: "м²", price: 550 },
-        { name: "Наливной пол", unit: "м²", price: 800 },
-        { name: "Уборка по полу", unit: "м²", price: 172 }
-      ],
-      "Гипсокартон": [
-        { name: "Короб ГКЛ", unit: "м.п.", price: 2000 },
-        { name: "Перегородка ГКЛ", unit: "м²", price: 900 },
-        { name: "Шпатлёвка ГКЛ (покраска)", unit: "м²", price: 740 },
-        { name: "Шпатлёвка ГКЛ (обои)", unit: "м²", price: 470 },
-        { name: "Закладные (свет)", unit: "шт", price: 1000 },
-        { name: "Закладные (люстра)", unit: "шт", price: 900 },
-        { name: "Закладные (гардина)", unit: "шт", price: 1200 },
-        { name: "Трековый свет", unit: "м.п.", price: 4200 },
-        { name: "Потолок ГКЛ", unit: "м²", price: 1940 },
-        { name: "Потолок под покраску", unit: "м²", price: 1820 },
-        { name: "Изготовление короба", unit: "м.п.", price: 920 },
-        { name: "ГКЛ над дверью", unit: "шт", price: 5500 },
-        { name: "Обшивка инсталяции", unit: "шт", price: 4550 }
-      ],
-      "Декоративные работы": [
-        { name: "Декоративная штукатурка", unit: "м²", price: 1650 },
-        { name: "Венецианская штукатурка", unit: "м²", price: 2200 }
-      ],
-      "Монтаж дверей и откосов": [
-        { name: "Межкомнатная дверь", unit: "шт", price: 6900 },
-        { name: "Двустворчатая дверь", unit: "шт", price: 3500 },
-        { name: "Подоконник", unit: "м.п.", price: 1500 },
-        { name: "ПВХ откосы", unit: "м.п.", price: 950 },
-        { name: "Арка ГКЛ", unit: "шт", price: 3500 },
-        { name: "Расширение проёма", unit: "м.п.", price: 1900 },
-        { name: "Портал входной двери", unit: "шт", price: 5100 },
-        { name: "F-профиль", unit: "шт", price: 500 }
-      ],
-      "Прочие работы": [
-        { name: "Радиаторы (с/у)", unit: "шт", price: 1700 },
-        { name: "Зеркало", unit: "шт", price: 2500 },
-        { name: "Поездки в магазин", unit: "шт", price: 30000 },
-        { name: "Вынос мусора", unit: "шт", price: 7000 }
-      ]
+      "Малярные работы": [{name:"Подготовка стен",unit:"м²",price:2170},{name:"Покраска стен",unit:"м²",price:450},{name:"Обои",unit:"м²",price:420},{name:"Шпатлёвка",unit:"м²",price:470},{name:"Грунтовка",unit:"м²",price:120},{name:"Шлифовка",unit:"м²",price:172},{name:"Подготовка комнаты",unit:"м²",price:110}],
+      "Штукатурные работы": [{name:"Штукатурка по маякам",unit:"м²",price:970},{name:"Штукатурка гипсовая",unit:"м²",price:950},{name:"Заделка штроб",unit:"м.п.",price:460},{name:"Штукатурка под багет",unit:"м.п.",price:150},{name:"Перфоуголок",unit:"м.п.",price:250},{name:"Фальш стены",unit:"м²",price:700}],
+      "Плиточные работы": [{name:"Укладка керамогранита",unit:"м²",price:3700},{name:"Укладка плитки",unit:"м²",price:3000},{name:"Запил 45",unit:"м.п.",price:1900},{name:"Сверление",unit:"шт",price:1000},{name:"Затирка эпокс",unit:"м²",price:1200},{name:"Затирка цемент",unit:"м²",price:350},{name:"Люк",unit:"от",price:4700},{name:"Полки",unit:"от",price:5000},{name:"Фигурный рез",unit:"м.п.",price:1400},{name:"Фартук",unit:"от",price:12000}],
+      "Сантехнические работы": [{name:"Душевая кабина",unit:"шт",price:8500},{name:"Ванна",unit:"шт",price:12000},{name:"Унитаз",unit:"шт",price:4450},{name:"Раковина",unit:"шт",price:4000},{name:"Смеситель",unit:"шт",price:2700},{name:"Полотенцесушитель",unit:"шт",price:4000},{name:"Водонагреватель",unit:"шт",price:4000},{name:"Стиралка",unit:"шт",price:3000},{name:"Нептун",unit:"от",price:20000},{name:"Перенос туалета",unit:"шт",price:5000},{name:"Лента",unit:"м.п.",price:402},{name:"Гиг. душ",unit:"шт",price:2500},{name:"Лейка",unit:"шт",price:3000},{name:"Краны",unit:"шт",price:460},{name:"Инсталяция",unit:"от",price:15000},{name:"Экран",unit:"от",price:12000},{name:"Бойлер",unit:"шт",price:4000}],
+      "Электромонтажные работы": [{name:"Щит",unit:"от",price:30000},{name:"Кабель 3x2.5",unit:"м.п.",price:150},{name:"Кабель 3x1.5",unit:"м.п.",price:120},{name:"Кабель 3x6",unit:"м.п.",price:300},{name:"Штробление (бет)",unit:"м.п.",price:700},{name:"Штробление (кир)",unit:"м.п.",price:250},{name:"Розетки",unit:"шт",price:390},{name:"LED",unit:"м.п.",price:350},{name:"Терморегулятор",unit:"шт",price:650},{name:"Приток",unit:"шт",price:850},{name:"Распайка",unit:"шт",price:1500},{name:"Подрозетник (бет)",unit:"шт",price:650},{name:"Подрозетник (кир)",unit:"шт",price:450},{name:"Кабель-канал",unit:"м.п.",price:100},{name:"Гофра",unit:"м.п.",price:90},{name:"Вытяжка",unit:"шт",price:2500},{name:"Вентиляция",unit:"шт",price:1380}],
+      "Демонтаж": [{name:"Очистка стен",unit:"м²",price:1000},{name:"Демонтаж штукатурки",unit:"м²",price:550},{name:"Демонтаж плитки",unit:"м²",price:500},{name:"Снос кирпича",unit:"м²",price:3100},{name:"Снос ГКЛ",unit:"м²",price:250},{name:"Проем (бетон)",unit:"шт",price:15000},{name:"Проем (кирпич)",unit:"шт",price:8000},{name:"Откосы",unit:"м.п.",price:600}],
+      "Устройство полов": [{name:"Кварцвинил",unit:"м²",price:1380},{name:"Паркет",unit:"м²",price:3500},{name:"Стяжка",unit:"м²",price:1000},{name:"Самовыравнив.",unit:"м²",price:850},{name:"Плинтус",unit:"м.п.",price:850},{name:"Порожек",unit:"м.п.",price:400},{name:"Стыковка",unit:"шт",price:5000},{name:"Теплый пол",unit:"м²",price:3500},{name:"Гидроизоляция",unit:"м²",price:550},{name:"Наливной",unit:"м²",price:800},{name:"Уборка",unit:"м²",price:172}],
+      "Гипсокартон": [{name:"Короб",unit:"м.п.",price:2000},{name:"Перегородка",unit:"м²",price:900},{name:"Шпатлевка (покр)",unit:"м²",price:740},{name:"Шпатлевка (обои)",unit:"м²",price:470},{name:"Закладная (свет)",unit:"шт",price:1000},{name:"Закладная (люстр)",unit:"шт",price:900},{name:"Закладная (гард)",unit:"шт",price:1200},{name:"Трек",unit:"м.п.",price:4200},{name:"Потолок",unit:"м²",price:1940},{name:"Потолок (покр)",unit:"м²",price:1820},{name:"Изг. короба",unit:"м.п.",price:920},{name:"Над дверью",unit:"шт",price:5500},{name:"Инсталяция",unit:"шт",price:4550}],
+      "Декоративные работы": [{name:"Декор. штукатурка",unit:"м²",price:1650},{name:"Венецианка",unit:"м²",price:2200}],
+      "Монтаж дверей и откосов": [{name:"Межкомнатная",unit:"шт",price:6900},{name:"Двустворчатая",unit:"шт",price:3500},{name:"Подоконник",unit:"м.п.",price:1500},{name:"ПВХ откосы",unit:"м.п.",price:950},{name:"Арка",unit:"шт",price:3500},{name:"Расширение",unit:"м.п.",price:1900},{name:"Портал",unit:"шт",price:5100},{name:"F-профиль",unit:"шт",price:500}],
+      "Прочие работы": [{name:"Радиаторы",unit:"шт",price:1700},{name:"Зеркало",unit:"шт",price:2500},{name:"Магазин",unit:"шт",price:30000},{name:"Мусор",unit:"шт",price:7000}]
     };
 
     let currentQuantities = {};
@@ -278,8 +163,7 @@
     }
 
     function sendData() {
-        // === СУПЕР СЖАТИЕ ДАННЫХ ===
-        // Отправляем только индексы: [ИндексРаздела, ИндексТовара, Кол-во]
+        // === СЖАТИЕ В JSON (ИНДЕКСЫ) ===
         const packed = [];
         let totalSum = 0;
 
@@ -288,24 +172,23 @@
                 const key = `${secName}|${itemIdx}`;
                 const sel = currentQuantities[key];
                 if(sel && sel.qty > 0) {
-                    packed.push([secIdx, itemIdx, sel.qty]); // ТОЛЬКО ЦИФРЫ
+                    packed.push([secIdx, itemIdx, sel.qty]); // ЦИФРЫ
                     totalSum += Math.round(sel.qty * item.price);
                 }
             });
         });
 
         if(packed.length === 0) {
-            alert("Выберите работы!");
+            tg.showPopup({message: "Пожалуйста, выберите работы!"});
             return;
         }
 
         const phone = document.getElementById("phone").value;
         if(phone.length < 10) {
-            alert("Укажите телефон!");
+            tg.showPopup({message: "Пожалуйста, укажите телефон!"});
             return;
         }
 
-        // Подготавливаем JSON
         const data = {
             ph: phone,
             ar: document.getElementById("area").value,
@@ -313,19 +196,11 @@
             tp: document.getElementById("repairType").value,
             kt: document.getElementById("isKotedge").checked ? 1 : 0,
             tt: totalSum,
-            pk: packed // Массив цифр
+            pk: packed // Отправляем массив цифр
         };
 
-        const jsonString = JSON.stringify(data);
-        
-        // ДИАГНОСТИКА: Показываем размер перед отправкой
-        if (jsonString.length > 4000) {
-            alert("Внимание! Размер данных: " + jsonString.length + " байт. Это слишком много, сократите выбор.");
-            return;
-        }
-
         try {
-            tg.sendData(jsonString);
+            tg.sendData(JSON.stringify(data));
         } catch(e) {
             alert("Ошибка отправки: " + e.message);
         }
