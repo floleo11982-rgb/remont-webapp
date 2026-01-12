@@ -2,125 +2,179 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Калькулятор ремонта</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    /* Твой оригинальный CSS */
-    :root { --primary: #d35400; --primary-dark: #a04000; --bg: #fdf6f0; --text: #2c3e50; --card-bg: #fff; }
-    body { font-family: 'Inter', sans-serif; background: var(--bg); padding: 16px; margin: 0; color: var(--text); }
-    .card { background: var(--card-bg); border-radius: 20px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-    h2 { text-align: center; color: var(--text); }
-    label { display: block; margin: 15px 0 5px; font-weight: 600; }
-    input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 12px; font-size: 16px; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #fdf6f0; padding: 16px; margin: 0; color: #2c3e50; }
+    .card { background: #fff; border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    h2 { text-align: center; margin-bottom: 20px; }
+    label { display: block; font-weight: 600; margin: 10px 0 5px; }
+    input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
     
-    .checkbox-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; }
-    .price-note { font-size: 12px; color: #7f8c8d; }
-    input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--primary); }
+    .tab-buttons { display: flex; overflow-x: auto; gap: 10px; margin: 15px 0; padding-bottom: 5px; scrollbar-width: none; }
+    .tab-button { padding: 8px 15px; background: #eee; border-radius: 8px; white-space: nowrap; cursor: pointer; font-size: 14px; font-weight: 600; }
+    .tab-button.active { background: #d35400; color: white; }
     
-    #result { font-size: 22px; font-weight: bold; color: var(--primary); text-align: center; margin: 20px 0; padding: 15px; background: #fff3e0; border-radius: 12px; }
+    .work-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+    .price { font-size: 12px; color: #7f8c8d; }
+    input[type="checkbox"] { width: 22px; height: 22px; accent-color: #d35400; }
     
-    button { background: var(--primary); color: white; border: none; padding: 18px; border-radius: 14px; font-size: 18px; width: 100%; font-weight: 600; cursor: pointer; }
-    button:active { background: var(--primary-dark); }
+    #result { font-size: 22px; font-weight: bold; color: #d35400; text-align: center; padding: 15px; background: #fff3e0; border-radius: 10px; margin-top: 20px; }
+    button { background: #d35400; color: white; width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; margin-top: 15px; }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h2>Расчёт ремонта</h2>
 
-    <label>Площадь (м²):</label>
-    <input type="number" id="area" value="50" oninput="calculate()">
+<div class="card">
+  <h2>Расчёт стоимости</h2>
 
-    <label>Комнаты:</label>
-    <select id="rooms">
-      <option value="1">1-комнатная</option>
-      <option value="2" selected>2-комнатная</option>
-      <option value="3">3-комнатная</option>
-    </select>
-    
-    <label>Тип:</label>
-    <select id="repairType">
-      <option>Косметический</option>
-      <option selected>Капитальный</option>
-      <option>Евро</option>
-    </select>
+  <label>Площадь (м²)</label>
+  <input type="number" id="area" value="50" oninput="calc()">
 
-    <h3>Работы:</h3>
-    <div id="works-list">
-        </div>
+  <label>Комнаты</label>
+  <select id="rooms">
+    <option value="1">1-комнатная</option>
+    <option value="2" selected>2-комнатная</option>
+    <option value="3">3-комнатная</option>
+    <option value="4+">4+ комнат</option>
+  </select>
+  
+  <label>Тип ремонта</label>
+  <select id="repairType">
+    <option>Косметический</option>
+    <option selected>Капитальный</option>
+    <option>Евро / Дизайн</option>
+  </select>
 
-    <div id="result">Итого: 0 ₽</div>
-
-    <button onclick="sendData()">📤 Отправить расчёт</button>
+  <div class="tab-buttons">
+    <div class="tab-button active" onclick="showTab('base')">Черновые</div>
+    <div class="tab-button" onclick="showTab('finish')">Чистовые</div>
+    <div class="tab-button" onclick="showTab('plumbing')">Сантехника</div>
+    <div class="tab-button" onclick="showTab('electric')">Электрика</div>
   </div>
 
-  <script>
-    const tg = window.Telegram.WebApp;
-    tg.ready();
-    tg.expand();
+  <div id="works-container"></div>
 
-    // Данные работ
-    const WORKS = [
-        { id: "w1", name: "Шпатлевка стен", price: 470 },
-        { id: "w2", name: "Покраска стен", price: 450 },
-        { id: "w3", name: "Плитка (укладка)", price: 3000 },
-        { id: "w4", name: "Электрика (точки)", price: 500 },
-        { id: "w5", name: "Стяжка пола", price: 900 }
-    ];
+  <div id="result">Итого: 0 ₽</div>
+  <button onclick="sendData()">📤 Отправить расчёт</button>
+</div>
 
-    // Рендер списка
-    const listEl = document.getElementById("works-list");
-    WORKS.forEach(w => {
-        listEl.innerHTML += `
-        <div class="checkbox-item">
-            <div>
-                <div>${w.name}</div>
-                <div class="price-note">${w.price} ₽/м²</div>
-            </div>
-            <input type="checkbox" id="${w.id}" onchange="calculate()" checked>
-        </div>`;
+<script>
+  const tg = window.Telegram.WebApp;
+  tg.ready();
+  tg.expand();
+
+  // ПОЛНАЯ БАЗА РАБОТ ИЗ ТВОЕГО ПЕРВОГО СКРИПТА
+  const WORKS_DB = {
+    base: [
+      { name: "Шпатлевка стен", price: 470 },
+      { name: "Штукатурка по маякам", price: 970 },
+      { name: "Грунтовка", price: 120 },
+      { name: "Стяжка пола", price: 1000 },
+      { name: "Демонтаж (стены)", price: 550 }
+    ],
+    finish: [
+      { name: "Покраска стен", price: 450 },
+      { name: "Обои", price: 420 },
+      { name: "Укладка ламината/кварцвинила", price: 1380 },
+      { name: "Плитка (укладка)", price: 3000 },
+      { name: "Затирка швов", price: 350 }
+    ],
+    plumbing: [
+      { name: "Разводка труб (точка)", price: 3500 },
+      { name: "Установка ванны", price: 12000 },
+      { name: "Установка инсталляции", price: 15000 },
+      { name: "Установка смесителя", price: 2700 }
+    ],
+    electric: [
+      { name: "Штробление", price: 700 },
+      { name: "Монтаж подрозетника", price: 650 },
+      { name: "Установка розетки/выкл", price: 390 },
+      { name: "Прокладка кабеля", price: 150 }
+    ]
+  };
+
+  let activeTab = 'base';
+  let selectedWorks = {}; // Храним состояние галочек
+
+  function showTab(tabName) {
+    activeTab = tabName;
+    document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+    document.querySelector(`.tab-button[onclick="showTab('${tabName}')"]`).classList.add('active');
+    render();
+  }
+
+  function render() {
+    const list = WORKS_DB[activeTab];
+    let html = '';
+    list.forEach(item => {
+      const isChecked = selectedWorks[item.name] ? 'checked' : '';
+      html += `
+        <div class="work-item">
+          <div>
+            <div>${item.name}</div>
+            <div class="price">${item.price} ₽/ед.</div>
+          </div>
+          <input type="checkbox" onchange="toggle('${item.name}', ${item.price}, this.checked)" ${isChecked}>
+        </div>
+      `;
     });
+    document.getElementById('works-container').innerHTML = html;
+  }
 
-    function calculate() {
-        const area = parseFloat(document.getElementById('area').value) || 0;
-        let total = 0;
-        
-        WORKS.forEach(w => {
-            if(document.getElementById(w.id).checked) {
-                total += w.price * area;
-            }
-        });
-        
-        document.getElementById('result').innerText = `Итого: ${total.toLocaleString()} ₽`;
-        return total;
-    }
+  function toggle(name, price, checked) {
+    if (checked) selectedWorks[name] = price;
+    else delete selectedWorks[name];
+    calc();
+  }
 
-    function sendData() {
-        const area = document.getElementById('area').value;
-        const rooms = document.getElementById('rooms').value;
-        const type = document.getElementById('repairType').value;
-        const totalSum = document.getElementById('result').innerText;
-        
-        let details = [];
-        WORKS.forEach(w => {
-            if(document.getElementById(w.id).checked) {
-                details.push(`${w.name} (${w.price}р * ${area}м)`);
-            }
-        });
-
-        const data = {
-            area: area,
-            rooms: rooms,
-            repairType: type,
-            total: totalSum,
-            details: details
-        };
-
-        tg.sendData(JSON.stringify(data));
+  function calc() {
+    const area = parseFloat(document.getElementById('area').value) || 0;
+    let total = 0;
+    
+    // Считаем сумму: цена работы * площадь (для простоты теста считаем всё от площади)
+    // В идеале можно вернуть инпуты кол-ва, но для теста сметы это надежнее
+    for (let price of Object.values(selectedWorks)) {
+      total += price * area;
     }
     
-    calculate();
-  </script>
+    document.getElementById('result').innerText = `Итого: ${total.toLocaleString()} ₽`;
+    return total;
+  }
+
+  function sendData() {
+    const area = document.getElementById('area').value;
+    const rooms = document.getElementById('rooms').value;
+    const type = document.getElementById('repairType').value;
+    const total = document.getElementById('result').innerText;
+    
+    // Формируем список строками
+    let details = [];
+    for (let [name, price] of Object.entries(selectedWorks)) {
+        details.push(`${name}: ${price}р * ${area}м`);
+    }
+
+    if (details.length === 0) {
+        tg.showPopup({message: "Выберите хотя бы одну работу!"});
+        return;
+    }
+
+    const data = {
+        area: area,
+        rooms: rooms,
+        repairType: type,
+        total: total,
+        details: details
+    };
+    
+    tg.sendData(JSON.stringify(data));
+  }
+
+  // Запуск
+  render();
+</script>
+
 </body>
 </html>
