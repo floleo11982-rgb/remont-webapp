@@ -5,84 +5,122 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Калькулятор ремонта</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: sans-serif; padding: 20px; background-color: #f5f5f5; }
-    h2 { text-align: center; }
-    label { display: block; margin-top: 10px; font-weight: bold; }
-    input, select { width: 100%; padding: 10px; margin-top: 5px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; }
-    button { width: 100%; padding: 15px; background: #d35400; color: white; border: none; border-radius: 5px; font-size: 16px; margin-top: 20px; cursor: pointer; }
-    #result { text-align: center; font-size: 20px; font-weight: bold; margin-top: 20px; color: #d35400; }
-    .item { display: flex; justify-content: space-between; margin-top: 10px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
+    /* Твой оригинальный CSS */
+    :root { --primary: #d35400; --primary-dark: #a04000; --bg: #fdf6f0; --text: #2c3e50; --card-bg: #fff; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); padding: 16px; margin: 0; color: var(--text); }
+    .card { background: var(--card-bg); border-radius: 20px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+    h2 { text-align: center; color: var(--text); }
+    label { display: block; margin: 15px 0 5px; font-weight: 600; }
+    input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 12px; font-size: 16px; box-sizing: border-box; }
+    
+    .checkbox-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; }
+    .price-note { font-size: 12px; color: #7f8c8d; }
+    input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--primary); }
+    
+    #result { font-size: 22px; font-weight: bold; color: var(--primary); text-align: center; margin: 20px 0; padding: 15px; background: #fff3e0; border-radius: 12px; }
+    
+    button { background: var(--primary); color: white; border: none; padding: 18px; border-radius: 14px; font-size: 18px; width: 100%; font-weight: 600; cursor: pointer; }
+    button:active { background: var(--primary-dark); }
   </style>
 </head>
 <body>
-  <h2>Расчет сметы</h2>
-  
-  <label>Площадь (м²):</label>
-  <input type="number" id="area" value="50">
-  
-  <label>Комнаты:</label>
-  <select id="rooms">
-      <option value="1">1-к</option>
-      <option value="2" selected>2-к</option>
-      <option value="3">3-к</option>
-  </select>
-  
-  <label>Тип ремонта:</label>
-  <select id="repairType">
+  <div class="card">
+    <h2>Расчёт ремонта</h2>
+
+    <label>Площадь (м²):</label>
+    <input type="number" id="area" value="50" oninput="calculate()">
+
+    <label>Комнаты:</label>
+    <select id="rooms">
+      <option value="1">1-комнатная</option>
+      <option value="2" selected>2-комнатная</option>
+      <option value="3">3-комнатная</option>
+    </select>
+    
+    <label>Тип:</label>
+    <select id="repairType">
       <option>Косметический</option>
       <option selected>Капитальный</option>
       <option>Евро</option>
-  </select>
+    </select>
 
-  <h3>Пример работ:</h3>
-  <div class="item">
-      <span>Шпатлевка (470р)</span>
-      <input type="checkbox" id="work1" checked onchange="calc()">
-  </div>
-  <div class="item">
-      <span>Покраска (450р)</span>
-      <input type="checkbox" id="work2" checked onchange="calc()">
-  </div>
+    <h3>Работы:</h3>
+    <div id="works-list">
+        </div>
 
-  <div id="result">Итого: 0 ₽</div>
-  
-  <button onclick="sendData()">ОТПРАВИТЬ СМЕТУ</button>
+    <div id="result">Итого: 0 ₽</div>
+
+    <button onclick="sendData()">📤 Отправить расчёт</button>
+  </div>
 
   <script>
     const tg = window.Telegram.WebApp;
     tg.ready();
     tg.expand();
 
-    function calc() {
-        let area = document.getElementById('area').value;
-        let sum = 0;
-        if(document.getElementById('work1').checked) sum += 470 * area;
-        if(document.getElementById('work2').checked) sum += 450 * area;
-        document.getElementById('result').innerText = "Итого: " + sum + " ₽";
-        return sum;
+    // Данные работ
+    const WORKS = [
+        { id: "w1", name: "Шпатлевка стен", price: 470 },
+        { id: "w2", name: "Покраска стен", price: 450 },
+        { id: "w3", name: "Плитка (укладка)", price: 3000 },
+        { id: "w4", name: "Электрика (точки)", price: 500 },
+        { id: "w5", name: "Стяжка пола", price: 900 }
+    ];
+
+    // Рендер списка
+    const listEl = document.getElementById("works-list");
+    WORKS.forEach(w => {
+        listEl.innerHTML += `
+        <div class="checkbox-item">
+            <div>
+                <div>${w.name}</div>
+                <div class="price-note">${w.price} ₽/м²</div>
+            </div>
+            <input type="checkbox" id="${w.id}" onchange="calculate()" checked>
+        </div>`;
+    });
+
+    function calculate() {
+        const area = parseFloat(document.getElementById('area').value) || 0;
+        let total = 0;
+        
+        WORKS.forEach(w => {
+            if(document.getElementById(w.id).checked) {
+                total += w.price * area;
+            }
+        });
+        
+        document.getElementById('result').innerText = `Итого: ${total.toLocaleString()} ₽`;
+        return total;
     }
 
     function sendData() {
-        let area = document.getElementById('area').value;
-        let rooms = document.getElementById('rooms').value;
-        let rType = document.getElementById('repairType').value;
-        let total = document.getElementById('result').innerText;
+        const area = document.getElementById('area').value;
+        const rooms = document.getElementById('rooms').value;
+        const type = document.getElementById('repairType').value;
+        const totalSum = document.getElementById('result').innerText;
+        
         let details = [];
-
-        if(document.getElementById('work1').checked) details.push("Шпатлевка");
-        if(document.getElementById('work2').checked) details.push("Покраска");
+        WORKS.forEach(w => {
+            if(document.getElementById(w.id).checked) {
+                details.push(`${w.name} (${w.price}р * ${area}м)`);
+            }
+        });
 
         const data = {
             area: area,
             rooms: rooms,
-            repairType: rType,
-            total: total,
+            repairType: type,
+            total: totalSum,
             details: details
         };
+
         tg.sendData(JSON.stringify(data));
     }
-    calc();
+    
+    calculate();
   </script>
 </body>
 </html>
