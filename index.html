@@ -1,126 +1,49 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Тест Сметы (DEBUG)</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: sans-serif; padding: 20px; background-color: #f5f5f5; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box;}
-        button { width: 100%; padding: 20px; background: #d35400; color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; }
-        button:active { background: #a04000; transform: scale(0.98); } /* Эффект нажатия */
-        .item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+        body { padding: 20px; font-family: sans-serif; }
+        button { 
+            width: 100%; height: 60px; background: red; color: white; 
+            font-size: 20px; border: none; border-radius: 10px; 
+        }
     </style>
 </head>
 <body>
-
-<div class="card">
-    <h2>ДИАГНОСТИКА</h2>
-    <p style="color:red; font-size: 12px;">Если всплывающих окон нет — скрипт сломан.</p>
+    <h1>ПРОВЕРКА СВЯЗИ</h1>
+    <p>Нажми кнопку ниже. Должно закрыться окно.</p>
     
-    <label>Площадь (м²):</label>
-    <input type="number" id="area" value="50">
+    <button onclick="sendTest()">ОТПРАВИТЬ ТЕСТ</button>
 
-    <h3>Работы:</h3>
-    <div id="list"></div>
-
-    <h3 id="total">Итого: 0 ₽</h3>
-
-    <button onclick="debugSend()">🚀 ОТПРАВИТЬ (ТЕСТ)</button>
-    <br><br>
-    <button onclick="window.location.reload()" style="background: #7f8c8d;">🔄 Обновить страницу</button>
-</div>
-
-<script>
-    // 1. Проверяем, загрузился ли скрипт Телеграма
-    let tg;
-    try {
-        tg = window.Telegram.WebApp;
-        tg.ready();
+    <script>
+        const tg = window.Telegram.WebApp;
         tg.expand();
-        // alert("✅ Телеграм подключен"); // Можно раскомментировать, если совсем всё глухо
-    } catch (e) {
-        alert("❌ Ошибка инициализации TG: " + e.message);
-    }
 
-    // Данные
-    const SERVICES = [
-        { name: "Штукатурка", price: 900 },
-        { name: "Стяжка", price: 600 }
-    ];
-    let cart = {};
+        function sendTest() {
+            // 1. Показываем сообщение перед отправкой
+            alert("Попытка отправки...");
 
-    // Отрисовка
-    const listEl = document.getElementById('list');
-    SERVICES.forEach((service) => {
-        const div = document.createElement('div');
-        div.className = 'item';
-        div.innerHTML = `
-            <span>${service.name} (${service.price}₽)</span>
-            <input type="checkbox" onchange="toggle('${service.name}', ${service.price}, this.checked)">
-        `;
-        listEl.appendChild(div);
-    });
+            try {
+                // 2. Формируем данные
+                const data = JSON.stringify({
+                    area: "100",
+                    total: "TEST_SUM",
+                    items: []
+                });
 
-    function toggle(name, price, checked) {
-        if (checked) cart[name] = price;
-        else delete cart[name];
-        calc();
-    }
-
-    function calc() {
-        let sum = 0;
-        Object.values(cart).forEach(p => sum += p);
-        document.getElementById('total').innerText = `Итого: ${sum} ₽`;
-    }
-
-    // --- ФУНКЦИЯ С ДИАГНОСТИКОЙ ---
-    function debugSend() {
-        alert("1️⃣ Кнопка нажата! Начинаем сборку...");
-
-        try {
-            const area = document.getElementById('area').value;
-            let items = [];
-            let totalSum = 0;
-
-            for (let [name, price] of Object.entries(cart)) {
-                items.push({ name: name, qty: 1, line_sum: price });
-                totalSum += price;
+                // 3. Отправляем
+                tg.sendData(data);
+                
+                // 4. Закрываем (чтобы понять, что сработало)
+                // tg.close(); // Пока не закрываем, чтобы видеть результат
+                
+            } catch (e) {
+                alert("Ошибка: " + e.message);
             }
-
-            // Проверка на пустоту
-            if (items.length === 0) {
-                alert("⚠️ Выберите хотя бы одну галочку!");
-                return;
-            }
-
-            alert("2️⃣ Данные собраны. Сумма: " + totalSum);
-
-            const dataToSend = {
-                area: area,
-                total: totalSum + " ₽",
-                items: items
-            };
-            
-            const jsonString = JSON.stringify(dataToSend);
-            alert("3️⃣ JSON готов. Отправляем в TG...");
-
-            // Самый важный момент
-            if (!tg) {
-                alert("❌ ОШИБКА: Объект 'tg' не найден. Вы открыли это в браузере?");
-                return;
-            }
-            
-            tg.sendData(jsonString);
-            alert("4️⃣ sendData выполнена! Окно должно закрыться.");
-
-        } catch (error) {
-            alert("🔥 КРИТИЧЕСКАЯ ОШИБКА JS:\n" + error.message);
         }
-    }
-</script>
-
+    </script>
 </body>
 </html>
