@@ -3,229 +3,86 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Калькулятор ремонта — УютФинал</title>
+  <title>Калькулятор ремонта</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root { --primary: #d35400; --primary-dark: #a04000; --secondary: #2c3e50; --bg: #fdf6f0; --card-bg: #ffffff; --text: #2c3e50; }
-    body { font-family: 'Inter', sans-serif; background: var(--bg); padding: 16px; margin: 0; color: var(--text); }
-    .card { background: var(--card-bg); border-radius: 20px; padding: 24px; margin: 12px 0; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-    h2 { font-size: 22px; margin: 0 0 20px; color: var(--secondary); text-align: center; }
-    label { display: block; margin: 14px 0 8px; font-weight: 600; font-size: 16px; }
-    input[type="number"], input[type="text"], select { width: 100%; padding: 14px; border: 1px solid #e0e0e0; border-radius: 12px; font-size: 16px; box-sizing: border-box; background: #fcfcfc; }
-    
-    /* Стили чекбоксов */
-    .checkbox-group { display: flex; flex-direction: column; gap: 16px; margin-top: 10px; }
-    .checkbox-item { display: grid; grid-template-columns: 1fr 90px; gap: 10px; align-items: center; padding-bottom: 12px; border-bottom: 1px solid #f0f0f0; }
-    .checkbox-content { display: flex; flex-direction: column; }
-    .checkbox-row { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }
-    .checkbox-row input[type="checkbox"] { width: 22px; height: 22px; margin-top: 0; accent-color: var(--primary); flex-shrink: 0; }
-    .work-name { font-size: 15px; line-height: 1.3; }
-    .price-note { font-size: 13px; color: #7f8c8d; margin-top: 4px; margin-left: 32px; }
-    .qty-input-wrapper { display: flex; flex-direction: column; align-items: center; }
-    .qty-input-wrapper input { text-align: center; padding: 8px; font-weight: 600; }
-    .unit-label { font-size: 11px; color: #999; margin-top: 4px; }
-
-    /* Табы */
-    .tab-buttons { display: flex; overflow-x: auto; gap: 8px; margin: 16px 0; padding-bottom: 5px; scrollbar-width: none; }
-    .tab-buttons::-webkit-scrollbar { display: none; }
-    .tab-button { padding: 10px 15px; background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 600; white-space: nowrap; transition: all 0.2s; }
-    .tab-button.active { background: var(--primary); color: white; border-color: var(--primary); }
-
-    #result { font-size: 20px; font-weight: 700; color: var(--primary-dark); margin: 20px 0; padding: 16px; background: #fff8e1; border-radius: 14px; text-align: center; border-left: 4px solid var(--primary); }
-    button { background: var(--primary); color: white; border: none; padding: 18px; border-radius: 14px; font-size: 18px; width: 100%; font-weight: 600; margin-top: 12px; cursor: pointer; transition: background 0.2s; }
-    button:hover { background: var(--primary-dark); }
-    .kotedge-checkbox { margin: 16px 0; display: flex; align-items: center; gap: 10px; }
-    .kotedge-checkbox input { width: 20px; height: 20px; }
+    body { font-family: sans-serif; padding: 20px; background-color: #f5f5f5; }
+    h2 { text-align: center; }
+    label { display: block; margin-top: 10px; font-weight: bold; }
+    input, select { width: 100%; padding: 10px; margin-top: 5px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; }
+    button { width: 100%; padding: 15px; background: #d35400; color: white; border: none; border-radius: 5px; font-size: 16px; margin-top: 20px; cursor: pointer; }
+    #result { text-align: center; font-size: 20px; font-weight: bold; margin-top: 20px; color: #d35400; }
+    .item { display: flex; justify-content: space-between; margin-top: 10px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h2 id="title">Приблизительный расчёт ремонта</h2>
+  <h2>Расчет сметы</h2>
+  
+  <label>Площадь (м²):</label>
+  <input type="number" id="area" value="50">
+  
+  <label>Комнаты:</label>
+  <select id="rooms">
+      <option value="1">1-к</option>
+      <option value="2" selected>2-к</option>
+      <option value="3">3-к</option>
+  </select>
+  
+  <label>Тип ремонта:</label>
+  <select id="repairType">
+      <option>Косметический</option>
+      <option selected>Капитальный</option>
+      <option>Евро</option>
+  </select>
 
-    <label>Площадь квартиры (м²):</label>
-    <input type="number" id="area" placeholder="0" min="0">
-
-    <label>Количество комнат:</label>
-    <select id="rooms">
-      <option value="1">1-комнатная</option>
-      <option value="2">2-комнатная</option>
-      <option value="3">3-комнатная</option>
-      <option value="4">4-комнатная</option>
-      <option value="5">5-комнатная</option>
-      <option value="6">6-комнатная</option>
-    </select>
-
-    <div class="kotedge-checkbox">
-      <input type="checkbox" id="isKotedge">
-      <label for="isKotedge" style="margin:0; cursor:pointer;">Частный дом / Коттедж</label>
-    </div>
-
-    <label>Тип ремонта:</label>
-    <select id="repairType">
-      <option value="cosmetic">Косметический</option>
-      <option value="capital" selected>Капитальный</option>
-      <option value="euro">Евро / Дизайнерский</option>
-    </select>
-
-    <div class="tab-buttons">
-      <div class="tab-button active" onclick="showSection('Малярные работы', this)">Малярные</div>
-      <div class="tab-button" onclick="showSection('Штукатурные работы', this)">Штукатурка</div>
-      <div class="tab-button" onclick="showSection('Плиточные работы', this)">Плитка</div>
-      <div class="tab-button" onclick="showSection('Сантехнические работы', this)">Сантехника</div>
-      <div class="tab-button" onclick="showSection('Электромонтажные работы', this)">Электрика</div>
-      <div class="tab-button" onclick="showSection('Демонтаж', this)">Демонтаж</div>
-      <div class="tab-button" onclick="showSection('Устройство полов', this)">Полы</div>
-      <div class="tab-button" onclick="showSection('Гипсокартон', this)">ГКЛ</div>
-      <div class="tab-button" onclick="showSection('Декоративные работы', this)">Декор</div>
-      <div class="tab-button" onclick="showSection('Монтаж дверей и откосов', this)">Двери</div>
-      <div class="tab-button" onclick="showSection('Прочие работы', this)">Прочее</div>
-    </div>
-
-    <div id="works"></div>
-
-    <div id="result">Итого: 0 ₽</div>
-
-    <button onclick="sendData()">📤 Отправить смету менеджеру</button>
+  <h3>Пример работ:</h3>
+  <div class="item">
+      <span>Шпатлевка (470р)</span>
+      <input type="checkbox" id="work1" checked onchange="calc()">
   </div>
+  <div class="item">
+      <span>Покраска (450р)</span>
+      <input type="checkbox" id="work2" checked onchange="calc()">
+  </div>
+
+  <div id="result">Итого: 0 ₽</div>
+  
+  <button onclick="sendData()">ОТПРАВИТЬ СМЕТУ</button>
 
   <script>
     const tg = window.Telegram.WebApp;
     tg.ready();
     tg.expand();
 
-    // ТВОИ ДАННЫЕ (Оставил сокращенный пример, чтобы влезло. 
-    // Если у тебя есть полная версия WORKS_DATA, вставь её сюда)
-    const WORKS_DATA = {
-      "Малярные работы": [
-        { name: "Подготовка стен под покраску", unit: "м²", price: 2170 },
-        { name: "Покраска стен (2 слоя)", unit: "м²", price: 450 },
-        { name: "Обои без подбора рисунка", unit: "м²", price: 420 },
-        { name: "Шпатлёвка стен под обои", unit: "м²", price: 470 },
-        { name: "Грунтовка стен", unit: "м²", price: 120 }
-      ],
-      "Штукатурные работы": [
-        { name: "Штукатурка стен по маякам", unit: "м²", price: 970 },
-        { name: "Заделка штроб", unit: "м.п.", price: 460 }
-      ],
-      "Плиточные работы": [
-        { name: "Укладка керамогранита", unit: "м²", price: 3700 },
-        { name: "Запил плитки под 45°", unit: "м.п.", price: 1900 }
-      ],
-      "Сантехнические работы": [ { name: "Установка ванны", unit: "шт", price: 12000 } ],
-      "Электромонтажные работы": [ { name: "Монтаж розеток", unit: "шт", price: 390 } ],
-      "Демонтаж": [ { name: "Демонтаж плитки", unit: "м²", price: 500 } ],
-      "Устройство полов": [ { name: "Укладка кварцвинила", unit: "м²", price: 1380 } ],
-      "Гипсокартон": [ { name: "Монтаж короба", unit: "м.п.", price: 2000 } ],
-      "Декоративные работы": [ { name: "Декор. штукатурка", unit: "м²", price: 1650 } ],
-      "Монтаж дверей и откосов": [ { name: "Установка двери", unit: "шт", price: 6900 } ],
-      "Прочие работы": [ { name: "Вынос мусора", unit: "шт", price: 7000 } ]
-    };
-    // ВСТАВЬ ПОЛНЫЙ WORKS_DATA ИЗ СВОЕГО ПЕРВОГО СКРИПТА, ЕСЛИ НУЖНО
-
-    let currentQuantities = {};
-    let activeSection = "Малярные работы";
-
-    function showSection(sectionName, buttonElement) {
-      document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-      buttonElement.classList.add('active');
-      activeSection = sectionName;
-      renderWorks();
-    }
-
-    function renderWorks() {
-      let html = '<div class="checkbox-group">';
-      if (WORKS_DATA[activeSection]) {
-        WORKS_DATA[activeSection].forEach((item, idx) => {
-          const key = `${activeSection}|${idx}`;
-          const saved = currentQuantities[key] || { qty: 0 };
-          
-          html += `
-            <div class="checkbox-item">
-              <div class="checkbox-content">
-                <label class="checkbox-row">
-                  <input type="checkbox" onchange="toggleWork('${key}', this.checked, ${item.price}, '${item.unit}', '${item.name}')" ${saved.qty > 0 ? 'checked' : ''}>
-                  <span class="work-name">${item.name}</span>
-                </label>
-                <div class="price-note">${item.price} ₽ / ${item.unit}</div>
-              </div>
-              <div class="qty-input-wrapper">
-                <input type="number" min="0" step="1" value="${saved.qty}"
-                       oninput="updateQty('${key}', this.value, ${item.price}, '${item.unit}', '${item.name}')">
-                <span class="unit-label">${item.unit}</span>
-              </div>
-            </div>`;
-        });
-      }
-      html += '</div>';
-      document.getElementById("works").innerHTML = html;
-      calculate();
-    }
-
-    function toggleWork(key, isChecked, price, unit, name) {
-      const qtyInput = document.querySelector(`input[oninput*="${key}"]`);
-      if (isChecked) {
-        qtyInput.value = '1';
-        currentQuantities[key] = { qty: 1, price, unit, name };
-      } else {
-        qtyInput.value = '0';
-        currentQuantities[key] = { qty: 0, price, unit, name };
-      }
-      calculate();
-    }
-
-    function updateQty(key, value, price, unit, name) {
-      let qty = parseInt(value) || 0;
-      currentQuantities[key] = { qty, price, unit, name };
-      const checkbox = document.querySelector(`input[onchange*="${key}"]`);
-      if (checkbox) checkbox.checked = (qty > 0);
-      calculate();
-    }
-
-    function calculate() {
-      let total = 0;
-      for (const item of Object.values(currentQuantities)) {
-        if (item.qty > 0) total += item.qty * item.price;
-      }
-      document.getElementById("result").innerText = `Итого: ${Math.round(total).toLocaleString('ru-RU')} ₽`;
+    function calc() {
+        let area = document.getElementById('area').value;
+        let sum = 0;
+        if(document.getElementById('work1').checked) sum += 470 * area;
+        if(document.getElementById('work2').checked) sum += 450 * area;
+        document.getElementById('result').innerText = "Итого: " + sum + " ₽";
+        return sum;
     }
 
     function sendData() {
-      // Собираем массив деталей (строки)
-      const details = [];
-      let totalSum = 0;
-      for (const item of Object.values(currentQuantities)) {
-        if (item.qty > 0) {
-          const lineTotal = Math.round(item.qty * item.price);
-          details.push(`${item.name}: ${item.qty} ${item.unit} = ${lineTotal} ₽`);
-          totalSum += lineTotal;
-        }
-      }
+        let area = document.getElementById('area').value;
+        let rooms = document.getElementById('rooms').value;
+        let rType = document.getElementById('repairType').value;
+        let total = document.getElementById('result').innerText;
+        let details = [];
 
-      if (details.length === 0) {
-        tg.showPopup({message: "Выберите хотя бы одну работу!"});
-        return;
-      }
+        if(document.getElementById('work1').checked) details.push("Шпатлевка");
+        if(document.getElementById('work2').checked) details.push("Покраска");
 
-      const area = document.getElementById("area").value || "—";
-      const rooms = document.getElementById("rooms").value;
-      const repairType = document.getElementById("repairType").options[document.getElementById("repairType").selectedIndex].text;
-      const isKotedge = document.getElementById("isKotedge").checked ? "Да" : "Нет";
-
-      const dataToSend = {
-        area: area,
-        rooms: rooms,
-        repairType: repairType,
-        isKotedge: isKotedge,
-        total: totalSum,
-        details: details // Массив строк
-      };
-
-      // ОТПРАВКА
-      tg.sendData(JSON.stringify(dataToSend));
+        const data = {
+            area: area,
+            rooms: rooms,
+            repairType: rType,
+            total: total,
+            details: details
+        };
+        tg.sendData(JSON.stringify(data));
     }
-
-    renderWorks();
+    calc();
   </script>
 </body>
 </html>
