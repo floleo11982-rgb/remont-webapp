@@ -3,59 +3,96 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Калькулятор ремонта</title>
+  <title>Калькулятор УютФинал</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root { --primary: #d35400; --primary-dark: #a04000; --bg: #fdf6f0; --card-bg: #ffffff; --text: #2c3e50; }
-    body { font-family: 'Inter', sans-serif; background: var(--bg); padding: 16px; margin: 0; color: var(--text); }
-    .card { background: var(--card-bg); border-radius: 20px; padding: 24px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-    h2 { font-size: 22px; text-align: center; margin-bottom: 20px; }
-    label { display: block; margin: 14px 0 8px; font-weight: 600; }
-    input, select { width: 100%; padding: 14px; border: 1px solid #e0e0e0; border-radius: 12px; font-size: 16px; box-sizing: border-box; }
-    .tab-buttons { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
-    .tab-button { padding: 10px; background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 10px; cursor: pointer; flex: 1 1 auto; text-align: center; font-weight: 600; font-size: 14px; }
-    .tab-button.active { background: var(--primary); color: white; border-color: var(--primary); }
-    .checkbox-item { display: grid; grid-template-columns: 1fr 90px; gap: 10px; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; }
-    .work-name { font-size: 15px; }
-    .price-note { font-size: 13px; color: #7f8c8d; }
-    input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--primary); }
-    #result { font-size: 20px; font-weight: 700; color: var(--primary-dark); text-align: center; margin: 20px 0; padding: 15px; background: #fff8e1; border-radius: 14px; }
-    button { background: var(--primary); color: white; border: none; padding: 18px; border-radius: 14px; font-size: 18px; width: 100%; font-weight: 600; cursor: pointer; }
-    .btn-contact { background: #27ae60; margin-top: 10px; }
+    :root { 
+        --primary: #d35400; 
+        --primary-light: #edbb99;
+        --bg: #fdf6f0; 
+        --card-bg: #ffffff; 
+        --text: #2c3e50; 
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); padding: 12px; margin: 0; color: var(--text); -webkit-tap-highlight-color: transparent; }
+    .card { background: var(--card-bg); border-radius: 20px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+    h2 { font-size: 20px; text-align: center; margin: 0 0 15px; }
+    
+    /* Inputs */
+    label { display: block; margin: 12px 0 6px; font-weight: 600; font-size: 14px; }
+    input, select { width: 100%; padding: 12px; border: 1px solid #e0e0e0; border-radius: 12px; font-size: 16px; box-sizing: border-box; outline: none; transition: 0.2s; }
+    input:focus, select:focus { border-color: var(--primary); }
+    
+    /* Main Tabs */
+    .tabs-wrapper { overflow-x: auto; white-space: nowrap; margin: 15px -10px; padding: 0 10px; -ms-overflow-style: none; scrollbar-width: none; }
+    .tabs-wrapper::-webkit-scrollbar { display: none; }
+    .tab-buttons { display: inline-flex; gap: 8px; }
+    .tab-button { padding: 10px 16px; background: #f0f2f5; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 13px; color: #7f8c8d; transition: 0.2s; border: 1px solid transparent; }
+    .tab-button.active { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(211, 84, 0, 0.3); }
+
+    /* Sub Tabs (Подгруппы) */
+    .sub-tabs-container { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 15px; padding: 10px; background: #fffcf5; border-radius: 12px; border: 1px dashed #e0e0e0; }
+    .sub-tab-btn { flex: 1 1 auto; text-align: center; padding: 8px 12px; font-size: 12px; border-radius: 8px; border: 1px solid #e0e0e0; background: white; color: #555; cursor: pointer; font-weight: 500; }
+    .sub-tab-btn.active { background: var(--primary-light); color: #6e2c00; border-color: var(--primary-light); font-weight: 700; }
+
+    /* List Items */
+    .checkbox-item { display: grid; grid-template-columns: 1fr 90px; gap: 10px; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+    .checkbox-row { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }
+    .work-name { font-size: 14px; line-height: 1.4; }
+    .price-note { font-size: 12px; color: #95a5a6; margin-top: 4px; margin-left: 32px; }
+    input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--primary); flex-shrink: 0; margin-top: 2px; }
+    
+    /* Quantity Input */
+    .qty-input-wrapper { display: flex; align-items: center; gap: 5px; justify-content: flex-end; }
+    .qty-input-wrapper input { width: 60px; padding: 8px; text-align: center; font-weight: 600; }
+    .unit-label { font-size: 12px; color: #95a5a6; width: 25px; }
+
+    /* Footer */
+    #result { font-size: 22px; font-weight: 800; color: var(--primary); text-align: center; margin: 25px 0; padding: 15px; background: #fff8e1; border-radius: 16px; border: 2px solid #fcebb6; }
+    button { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 14px; font-size: 16px; width: 100%; font-weight: 700; cursor: pointer; margin-bottom: 10px; box-shadow: 0 4px 15px rgba(211, 84, 0, 0.4); }
+    .btn-contact { background: white; color: var(--text); border: 2px solid #e0e0e0; box-shadow: none; }
   </style>
 </head>
 <body>
   <div class="card">
-    <h2 id="title">Расчёт ремонта</h2>
-    <label>Площадь (м²):</label> <input type="number" id="area" placeholder="0">
-    <label>Комнаты:</label>
-    <select id="rooms">
-      <option value="1">1-к</option><option value="2">2-к</option><option value="3">3-к</option>
-      <option value="4">4-к</option><option value="5">5-к</option><option value="6">6-к</option>
-    </select>
-    <div style="margin: 15px 0; display:flex; align-items:center; gap:10px;">
-      <input type="checkbox" id="isKotedge"> <label for="isKotedge" style="margin:0">Частный дом / Коттедж</label>
+    <h2 id="title">Калькулятор 2026</h2>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div>
+            <label>Площадь (м²):</label> 
+            <input type="number" id="area" placeholder="0" inputmode="numeric">
+        </div>
+        <div>
+            <label>Комнаты:</label>
+            <select id="rooms">
+                <option value="1">1-к</option><option value="2">2-к</option>
+                <option value="3">3-к</option><option value="4+">4+</option>
+            </select>
+        </div>
     </div>
-    <label>Тип:</label>
-    <select id="repairType">
-      <option value="cosmetic">Косметический</option>
-      <option value="capital" selected>Капитальный</option>
-      <option value="euro">Евро</option>
-    </select>
 
-    <div class="tab-buttons" id="tabs"></div>
+    <div style="margin: 15px 0; display:flex; align-items:center; gap:10px; background: #f8f9fa; padding: 10px; border-radius: 10px;">
+      <input type="checkbox" id="isKotedge" style="width: 20px; height: 20px;"> 
+      <label for="isKotedge" style="margin:0; font-weight: 500;">Частный дом / Коттедж</label>
+    </div>
+
+    <div class="tabs-wrapper">
+        <div class="tab-buttons" id="tabs"></div>
+    </div>
+
+    <div id="sub-tabs-area" class="sub-tabs-container" style="display: none;"></div>
+
     <div id="works"></div>
     <div id="result">0 ₽</div>
 
     <label>Адрес объекта:</label>
-    <input type="text" id="address" placeholder="Улица, дом, квартира" style="border: 1px solid #ddd;">
+    <input type="text" id="address" placeholder="Улица, дом">
 
-    <label style="color: #d35400;">Телефон (обязательно):</label>
-    <input type="tel" id="phone" placeholder="+7 (999) 000-00-00" style="border: 2px solid #d35400; background: #fff8e1;">
+    <label style="color: var(--primary);">Телефон:</label>
+    <input type="tel" id="phone" placeholder="+7 (___) ___-__-__">
 
-    <button onclick="sendData()">📤 Отправить расчёт</button>
-    <button class="btn-contact" onclick="callMaster()">📞 Связаться</button>
+    <button onclick="sendData()">📤 Отправить смету</button>
+    <button class="btn-contact" onclick="callMaster()">📞 Написать мастеру</button>
   </div>
 
   <script>
@@ -63,52 +100,250 @@
     tg.ready();
     tg.expand();
 
-    const SECTION_ORDER = [
-        "Малярные работы", "Штукатурные работы", "Плиточные работы", 
-        "Сантехнические работы", "Электромонтажные работы", "Демонтаж", 
-        "Устройство полов", "Гипсокартон", "Декоративные работы", 
-        "Монтаж дверей и откосов", "Прочие работы"
-    ];
-
+    // ================== ДАННЫЕ СМЕТЫ ==================
+    // Структура: Категория -> Подгруппа -> Список работ
+    // Если подгрупп нет, используем "Общие работы"
+    
     const WORKS_DATA = {
-      "Малярные работы": [{name:"Подготовка стен",unit:"м²",price:2170},{name:"Покраска стен",unit:"м²",price:450},{name:"Обои",unit:"м²",price:420},{name:"Шпатлёвка",unit:"м²",price:470},{name:"Грунтовка",unit:"м²",price:120},{name:"Шлифовка",unit:"м²",price:172},{name:"Подготовка комнаты",unit:"м²",price:110}],
-      "Штукатурные работы": [{name:"Штукатурка по маякам",unit:"м²",price:970},{name:"Штукатурка гипсовая",unit:"м²",price:950},{name:"Заделка штроб",unit:"м.п.",price:460},{name:"Штукатурка под багет",unit:"м.п.",price:150},{name:"Перфоуголок",unit:"м.п.",price:250},{name:"Фальш стены",unit:"м²",price:700}],
-      "Плиточные работы": [{name:"Укладка керамогранита",unit:"м²",price:3700},{name:"Укладка плитки",unit:"м²",price:3000},{name:"Запил 45",unit:"м.п.",price:1900},{name:"Сверление",unit:"шт",price:1000},{name:"Затирка эпокс",unit:"м²",price:1200},{name:"Затирка цемент",unit:"м²",price:350},{name:"Люк",unit:"от",price:4700},{name:"Полки",unit:"от",price:5000},{name:"Фигурный рез",unit:"м.п.",price:1400},{name:"Фартук",unit:"от",price:12000}],
-      "Сантехнические работы": [{name:"Душевая кабина",unit:"шт",price:8500},{name:"Ванна",unit:"шт",price:12000},{name:"Унитаз",unit:"шт",price:4450},{name:"Раковина",unit:"шт",price:4000},{name:"Смеситель",unit:"шт",price:2700},{name:"Полотенцесушитель",unit:"шт",price:4000},{name:"Водонагреватель",unit:"шт",price:4000},{name:"Стиралка",unit:"шт",price:3000},{name:"Нептун",unit:"от",price:20000},{name:"Перенос туалета",unit:"шт",price:5000},{name:"Лента",unit:"м.п.",price:402},{name:"Гиг. душ",unit:"шт",price:2500},{name:"Лейка",unit:"шт",price:3000},{name:"Краны",unit:"шт",price:460},{name:"Инсталяция",unit:"от",price:15000},{name:"Экран",unit:"от",price:12000},{name:"Бойлер",unit:"шт",price:4000}],
-      "Электромонтажные работы": [{name:"Щит",unit:"от",price:30000},{name:"Кабель 3x2.5",unit:"м.п.",price:150},{name:"Кабель 3x1.5",unit:"м.п.",price:120},{name:"Кабель 3x6",unit:"м.п.",price:300},{name:"Штробление (бет)",unit:"м.п.",price:700},{name:"Штробление (кир)",unit:"м.п.",price:250},{name:"Розетки",unit:"шт",price:390},{name:"LED",unit:"м.п.",price:350},{name:"Терморегулятор",unit:"шт",price:650},{name:"Приток",unit:"шт",price:850},{name:"Распайка",unit:"шт",price:1500},{name:"Подрозетник (бет)",unit:"шт",price:650},{name:"Подрозетник (кир)",unit:"шт",price:450},{name:"Кабель-канал",unit:"м.п.",price:100},{name:"Гофра",unit:"м.п.",price:90},{name:"Вытяжка",unit:"шт",price:2500},{name:"Вентиляция",unit:"шт",price:1380}],
-      "Демонтаж": [{name:"Очистка стен",unit:"м²",price:1000},{name:"Демонтаж штукатурки",unit:"м²",price:550},{name:"Демонтаж плитки",unit:"м²",price:500},{name:"Снос кирпича",unit:"м²",price:3100},{name:"Снос ГКЛ",unit:"м²",price:250},{name:"Проем (бетон)",unit:"шт",price:15000},{name:"Проем (кирпич)",unit:"шт",price:8000},{name:"Откосы",unit:"м.п.",price:600}],
-      "Устройство полов": [{name:"Кварцвинил",unit:"м²",price:1380},{name:"Паркет",unit:"м²",price:3500},{name:"Стяжка",unit:"м²",price:1000},{name:"Самовыравнив.",unit:"м²",price:850},{name:"Плинтус",unit:"м.п.",price:850},{name:"Порожек",unit:"м.п.",price:400},{name:"Стыковка",unit:"шт",price:5000},{name:"Теплый пол",unit:"м²",price:3500},{name:"Гидроизоляция",unit:"м²",price:550},{name:"Наливной",unit:"м²",price:800},{name:"Уборка",unit:"м²",price:172}],
-      "Гипсокартон": [{name:"Короб",unit:"м.п.",price:2000},{name:"Перегородка",unit:"м²",price:900},{name:"Шпатлевка (покр)",unit:"м²",price:740},{name:"Шпатлевка (обои)",unit:"м²",price:470},{name:"Закладная (свет)",unit:"шт",price:1000},{name:"Закладная (люстр)",unit:"шт",price:900},{name:"Закладная (гард)",unit:"шт",price:1200},{name:"Трек",unit:"м.п.",price:4200},{name:"Потолок",unit:"м²",price:1940},{name:"Потолок (покр)",unit:"м²",price:1820},{name:"Изг. короба",unit:"м.п.",price:920},{name:"Над дверью",unit:"шт",price:5500},{name:"Инсталяция",unit:"шт",price:4550}],
-      "Декоративные работы": [{name:"Декор. штукатурка",unit:"м²",price:1650},{name:"Венецианка",unit:"м²",price:2200}],
-      "Монтаж дверей и откосов": [{name:"Межкомнатная",unit:"шт",price:6900},{name:"Двустворчатая",unit:"шт",price:3500},{name:"Подоконник",unit:"м.п.",price:1500},{name:"ПВХ откосы",unit:"м.п.",price:950},{name:"Арка",unit:"шт",price:3500},{name:"Расширение",unit:"м.п.",price:1900},{name:"Портал",unit:"шт",price:5100},{name:"F-профиль",unit:"шт",price:500}],
-      "Прочие работы": [{name:"Радиаторы",unit:"шт",price:1700},{name:"Зеркало",unit:"шт",price:2500},{name:"Магазин",unit:"шт",price:30000},{name:"Мусор",unit:"шт",price:7000}]
+      "Демонтажные работы": {
+        "Стены": [
+            {name: "Удаление старых стен из бетона", unit: "м²", price: 5500},
+            {name: "Демонтаж бетонной стены до 20 см", unit: "м²", price: 3500},
+            {name: "Демонтаж стены кирпичной до 60 см", unit: "м²", price: 2700},
+            {name: "Снос стен из сибита", unit: "м²", price: 450},
+            {name: "Пробивка проема в стене (бетон)", unit: "шт", price: 17000},
+            {name: "Пробивка дверных проходов (бетон)", unit: "шт", price: 15000},
+            {name: "Резка дверного проема (кирпич)", unit: "шт", price: 5500},
+            {name: "Демонтаж сухой штукатурки", unit: "м²", price: 550},
+            {name: "Снятие старой плитки со стен", unit: "м²", price: 500},
+            {name: "Снятие побелки / набела", unit: "м²", price: 850},
+            {name: "Удаление старых обоев", unit: "м²", price: 180},
+            {name: "Демонтаж обшивки (вагонка, ПВХ)", unit: "м²", price: 350},
+            {name: "Демонтаж перегородок из ГКЛ", unit: "м²", price: 500},
+            {name: "Снятие вклееного зеркала", unit: "м²", price: 275}
+        ],
+        "Пол": [
+            {name: "Демонтаж пола (бетон до 10 см)", unit: "м²", price: 10800},
+            {name: "Демонтаж пола под сантехкабиной", unit: "м²", price: 3000},
+            {name: "Демонтаж стяжки", unit: "м²", price: 2500},
+            {name: "Демонтаж линолеума, ковролина", unit: "м²", price: 1350},
+            {name: "Разборка деревянного пола", unit: "м²", price: 750},
+            {name: "Снятие паркета", unit: "м.п.", price: 400},
+            {name: "Демонтаж плитки на полу", unit: "м²", price: 300},
+            {name: "Демонтаж плинтуса", unit: "м.п.", price: 100}
+        ],
+        "Потолок": [
+            {name: "Очистка потолка от обоев", unit: "м²", price: 1500},
+            {name: "Разборка потолка из ГКЛ", unit: "м²", price: 600},
+            {name: "Снятие набела с потолка", unit: "м²", price: 300},
+            {name: "Демонтаж подвесных потолков", unit: "м²", price: 350},
+            {name: "Демонтаж лепнины/плинтуса", unit: "м.п.", price: 100}
+        ]
+      },
+      "Потолок (Монтаж)": {
+        "Штукатурка и покраска": [
+            {name: "Штукатурка потолка по маякам", unit: "м²", price: 1900},
+            {name: "Шпаклевка потолка (шитрок/финиш)", unit: "м²", price: 1100},
+            {name: "Покраска потолка", unit: "м²", price: 640},
+            {name: "Поклейка стеклохолста", unit: "м²", price: 490},
+            {name: "Грунтовка потолка", unit: "м²", price: 150},
+            {name: "Заделка швов (рустов)", unit: "м.п.", price: 400}
+        ],
+        "ГКЛ и системы": [
+            {name: "Потолок из ГКЛ (3 уровня)", unit: "м²", price: 2500},
+            {name: "Потолок из ГКЛ (2 уровня)", unit: "м²", price: 2100},
+            {name: "Потолок из ГКЛ (1 уровень)", unit: "м²", price: 1900},
+            {name: "Монтаж фигурного потолка ГКЛ", unit: "м²", price: 1450},
+            {name: "Портал полукруглой формы", unit: "м.п.", price: 1650},
+            {name: "Монтаж реечного потолка", unit: "м²", price: 900},
+            {name: "Потолок из панелей ПВХ/МДФ", unit: "м²", price: 700},
+            {name: "Монтаж потолка Армстронг", unit: "м²", price: 500}
+        ]
+      },
+      "Стены (Монтаж)": {
+        "Перегородки": [
+            {name: "Возведение перегородок (кирпич)", unit: "м²", price: 3100},
+            {name: "Возведение перегородок (сибит)", unit: "м²", price: 2300},
+            {name: "Перегородки из стеклоблоков", unit: "м²", price: 2000},
+            {name: "Перегородки из ГКЛ (сложные)", unit: "м²", price: 1750},
+            {name: "Монтаж короба из ГКЛ", unit: "шт", price: 2500},
+            {name: "Монтаж откосов ГКЛ/ПВХ", unit: "м.п.", price: 950},
+            {name: "Формирование дверного проёма", unit: "шт", price: 17000}
+        ],
+        "Выравнивание": [
+            {name: "Штукатурка стен по маякам", unit: "м²", price: 970},
+            {name: "Нанесение фактурной штукатурки", unit: "м²", price: 1800},
+            {name: "Венецианская штукатурка", unit: "м²", price: 1400},
+            {name: "Шпаклевка стен под покраску", unit: "м²", price: 520},
+            {name: "Шпаклевка стен под обои", unit: "м²", price: 470},
+            {name: "Армирование стен сеткой", unit: "м²", price: 450},
+            {name: "Грунтовка стен", unit: "м²", price: 120}
+        ],
+        "Финишная отделка": [
+            {name: "Облицовка мозаикой / камнем", unit: "м²", price: 6500},
+            {name: "Плитка под кирпич/камень", unit: "м²", price: 3500},
+            {name: "Укладка керамогранита (стены)", unit: "м²", price: 3500},
+            {name: "Облицовка пробкой", unit: "м²", price: 1000},
+            {name: "Монтаж декор. реек", unit: "м²", price: 950},
+            {name: "Поклейка обоев", unit: "м²", price: 650},
+            {name: "Поклейка обоев с подбором", unit: "м²", price: 900},
+            {name: "Поклейка фотообоев", unit: "м²", price: 1200},
+            {name: "Покраска стен", unit: "м²", price: 520},
+            {name: "Монтаж панелей МДФ/Пластик", unit: "м²", price: 700}
+        ]
+      },
+      "Пол (Монтаж)": {
+        "Стяжка": [
+            {name: "Стяжка пола по маякам", unit: "м²", price: 1300},
+            {name: "Сухие полы (Кнауф)", unit: "м²", price: 650},
+            {name: "Наливной пол", unit: "м²", price: 850},
+            {name: "Армирование стяжки сеткой", unit: "м²", price: 450},
+            {name: "Гидроизоляция пола", unit: "м²", price: 550},
+            {name: "Монтаж фанеры на лаги", unit: "м²", price: 1000}
+        ],
+        "Покрытия": [
+            {name: "Укладка паркетной доски", unit: "м²", price: 3500},
+            {name: "Укладка штучного паркета", unit: "м²", price: 1700},
+            {name: "Укладка керамогранита", unit: "м²", price: 2900},
+            {name: "Укладка мозаики", unit: "м²", price: 6500},
+            {name: "Облицовка камнем", unit: "м²", price: 5500},
+            {name: "Ламинат / Кварцвинил", unit: "м²", price: 980},
+            {name: "Линолеум / Ковролин (клей)", unit: "м²", price: 650},
+            {name: "Укладка плитки ПВХ", unit: "м²", price: 630}
+        ],
+        "Плинтуса": [
+            {name: "Монтаж теплого плинтуса", unit: "м.п.", price: 2000},
+            {name: "Монтаж теневого плинтуса", unit: "м.п.", price: 1150},
+            {name: "Монтаж скрытого плинтуса", unit: "м.п.", price: 1000},
+            {name: "Плинтус (керамика/дюрополимер)", unit: "м.п.", price: 950},
+            {name: "Монтаж плинтуса МДФ", unit: "м.п.", price: 950},
+            {name: "Изготовление порога из кафеля", unit: "м²", price: 2000}
+        ]
+      },
+      "Электрика": {
+        "Основные работы": [
+            {name: "Монтаж световой линии", unit: "м.п.", price: 1500},
+            {name: "Монтаж трековой линии", unit: "м.п.", price: 2000},
+            {name: "Монтаж щита (внутренний)", unit: "от", price: 15000},
+            {name: "Сборка электрощита", unit: "шт", price: 6000},
+            {name: "Штробление стен (монолит)", unit: "м.п.", price: 850},
+            {name: "Монтаж теплого пола (электро)", unit: "м²", price: 800},
+            {name: "Установка люстры", unit: "шт", price: 1500},
+            {name: "Монтаж бра / светильников", unit: "шт", price: 950},
+            {name: "Монтаж точечного светильника", unit: "шт", price: 650},
+            {name: "Монтаж розетки 380 В", unit: "шт", price: 600},
+            {name: "Монтаж выключателя/розетки", unit: "шт", price: 350},
+            {name: "Монтаж подрозетника (бетон)", unit: "шт", price: 650},
+            {name: "Прокладка кабеля", unit: "м.п.", price: 210},
+            {name: "Установка видеодомофона", unit: "шт", price: 600},
+            {name: "Терморегулятор теплого пола", unit: "шт", price: 1450}
+        ]
+      },
+      "Сантехника": {
+        "Основные работы": [
+            {name: "Инженерные сети (комплекс)", unit: "от", price: 45000},
+            {name: "Система очистки воды", unit: "от", price: 25000},
+            {name: "Душевой поддон (бетон)", unit: "от", price: 25000},
+            {name: "Установка душевой кабины", unit: "шт", price: 8500},
+            {name: "Установка ванны", unit: "шт", price: 8000},
+            {name: "Замена радиатора (сварка)", unit: "шт", price: 4000},
+            {name: "Установка унитаза / биде", unit: "шт", price: 4900},
+            {name: "Установка инсталляции", unit: "шт", price: 4500},
+            {name: "Полотенцесушитель/Водонагреватель", unit: "шт", price: 3500},
+            {name: "Установка раковины", unit: "шт", price: 2500},
+            {name: "Монтаж смесителя", unit: "шт", price: 2000},
+            {name: "Система защиты от протечек", unit: "от", price: 16000},
+            {name: "Разводка труб (комплекс)", unit: "от", price: 12000},
+            {name: "Люк скрытого монтажа", unit: "от", price: 4000}
+        ]
+      },
+      "Двери и Прочее": {
+        "Основные работы": [
+            {name: "Установка межкомн. дверей", unit: "от", price: 3550},
+            {name: "Монтаж столешницы (бетон)", unit: "м²", price: 12500},
+            {name: "Покраска дверей", unit: "шт", price: 2100},
+            {name: "Установка подоконника", unit: "шт", price: 2500},
+            {name: "Монтаж откосов (портал)", unit: "компл", price: 2500}
+        ]
+      },
+      "Прочие работы": {
+        "Разное": [
+            {name: "Радиаторы (монтаж)", unit: "шт", price: 1700},
+            {name: "Зеркало", unit: "шт", price: 2500},
+            {name: "Магазин (доставка/подъем)", unit: "шт", price: 30000},
+            {name: "Вывоз мусора", unit: "шт", price: 7000}
+        ]
+      }
     };
 
+    // Переменные состояния
     let currentQuantities = {};
-    let activeSection = SECTION_ORDER[0];
+    let activeSection = Object.keys(WORKS_DATA)[0];
+    let activeSubSection = Object.keys(WORKS_DATA[activeSection])[0];
 
+    // Инициализация
     const tabsContainer = document.getElementById("tabs");
-    SECTION_ORDER.forEach(secName => {
+    const subTabsContainer = document.getElementById("sub-tabs-area");
+
+    // Рендер Главных вкладок
+    Object.keys(WORKS_DATA).forEach(secName => {
         const btn = document.createElement("div");
         btn.className = `tab-button ${secName === activeSection ? 'active' : ''}`;
-        btn.innerText = secName.replace(" работы", "");
-        btn.onclick = () => showSection(secName, btn);
+        btn.innerText = secName.replace(" (Монтаж)", "").replace(" работы", "");
+        btn.onclick = () => switchSection(secName, btn);
         tabsContainer.appendChild(btn);
     });
 
-    function showSection(sectionName, btn) {
+    renderSubTabs();
+    renderWorks();
+
+    function switchSection(sectionName, btn) {
+        // Смена активного класса
         document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
+        
         activeSection = sectionName;
+        // При смене раздела выбираем первую подгруппу
+        activeSubSection = Object.keys(WORKS_DATA[sectionName])[0];
+        
+        renderSubTabs();
         renderWorks();
+    }
+
+    function renderSubTabs() {
+        subTabsContainer.innerHTML = '';
+        const subGroups = Object.keys(WORKS_DATA[activeSection]);
+        
+        // Если подгруппа только одна и она называется "Основные работы" или "Разное", можно скрыть, 
+        // но для единообразия оставим или скроем.
+        // Здесь: всегда показываем, чтобы было понятно.
+        
+        subTabsContainer.style.display = 'flex';
+
+        subGroups.forEach(subName => {
+            const btn = document.createElement("div");
+            btn.className = `sub-tab-btn ${subName === activeSubSection ? 'active' : ''}`;
+            btn.innerText = subName;
+            btn.onclick = () => {
+                activeSubSection = subName;
+                document.querySelectorAll('.sub-tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                renderWorks();
+            };
+            subTabsContainer.appendChild(btn);
+        });
     }
 
     function renderWorks() {
         let html = '<div class="checkbox-group">';
-        WORKS_DATA[activeSection].forEach((item, idx) => {
-            const key = `${activeSection}|${idx}`;
+        const items = WORKS_DATA[activeSection][activeSubSection];
+
+        items.forEach((item) => {
+            // Генерируем уникальный ключ: Категория|Подгруппа|Название
+            const key = `${activeSection}|${activeSubSection}|${item.name}`;
             const saved = currentQuantities[key] || { qty: 0 };
             const isChecked = saved.qty > 0;
+            
             html += `
             <div class="checkbox-item">
                 <div class="checkbox-content">
@@ -116,7 +351,7 @@
                         <input type="checkbox" onchange="toggle('${key}', ${item.price}, this.checked)" ${isChecked ? 'checked' : ''}>
                         <span class="work-name">${item.name}</span>
                     </label>
-                    <div class="price-note">${item.price} ₽ / ${item.unit}</div>
+                    <div class="price-note">${item.price.toLocaleString()} ₽ / ${item.unit}</div>
                 </div>
                 <div class="qty-input-wrapper">
                     <input type="number" value="${saved.qty > 0 ? saved.qty : ''}" 
@@ -131,7 +366,8 @@
         calculate();
     }
 
-    function toggle(key, price, checked) {
+    // Логика чекбоксов и ввода
+    window.toggle = function(key, price, checked) {
         const input = document.querySelector(`input[oninput*="'${key}'"]`);
         if(checked) {
             input.value = 1;
@@ -143,7 +379,7 @@
         calculate();
     }
 
-    function updateQty(key, price, val) {
+    window.updateQty = function(key, price, val) {
         const qty = parseFloat(val);
         const checkbox = document.querySelector(`input[onchange*="'${key}'"]`);
         if(qty > 0) {
@@ -164,19 +400,35 @@
         document.getElementById("result").innerText = `Итого: ${Math.round(total).toLocaleString('ru-RU')} ₽`;
     }
 
-    function sendData() {
+    // Подготовка данных для отправки
+    window.sendData = function() {
         const packed = [];
         let totalSum = 0;
 
-        SECTION_ORDER.forEach((secName, secIdx) => {
-            WORKS_DATA[secName].forEach((item, itemIdx) => {
-                const key = `${secName}|${itemIdx}`;
-                const sel = currentQuantities[key];
-                if(sel && sel.qty > 0) {
-                    packed.push([secIdx, itemIdx, sel.qty]);
-                    totalSum += Math.round(sel.qty * item.price);
-                }
+        // Чтобы бот понял структуру, мы должны "выпрямить" вложенность.
+        // Мы будем перебирать WORKS_DATA в строгом порядке и назначать индексы.
+        
+        let globalSectionIdx = 0;
+        
+        Object.keys(WORKS_DATA).forEach((secName) => {
+            let globalItemIdx = 0; // Сквозной индекс внутри категории (сквозь подгруппы)
+            
+            Object.keys(WORKS_DATA[secName]).forEach((subName) => {
+                const items = WORKS_DATA[secName][subName];
+                
+                items.forEach((item) => {
+                    const key = `${secName}|${subName}|${item.name}`;
+                    const sel = currentQuantities[key];
+                    
+                    if(sel && sel.qty > 0) {
+                        // Добавляем: [ИндексКатегории, СквознойИндексТовара, Количество]
+                        packed.push([globalSectionIdx, globalItemIdx, sel.qty]);
+                        totalSum += Math.round(sel.qty * item.price);
+                    }
+                    globalItemIdx++;
+                });
             });
+            globalSectionIdx++;
         });
 
         if(packed.length === 0) {
@@ -190,37 +442,23 @@
             return;
         }
 
-        const address = document.getElementById("address").value || "Не указан";
-
         const data = {
             ph: phone,
-            addr: address,
+            addr: document.getElementById("address").value || "Не указан",
             ar: document.getElementById("area").value,
             rm: document.getElementById("rooms").value,
-            tp: document.getElementById("repairType").value,
+            tp: "user_calc", // Метка, что расчет пользовательский
             kt: document.getElementById("isKotedge").checked ? 1 : 0,
             tt: totalSum,
             pk: packed
         };
 
-        try {
-            tg.sendData(JSON.stringify(data));
-        } catch(e) {
-            alert("Ошибка отправки: " + e.message);
-        }
-    }
-
-    function updateTitle() {
-        const isK = document.getElementById("isKotedge").checked;
-        document.getElementById("title").innerText = isK ? "Расчёт (Коттедж)" : "Расчёт ремонта";
+        tg.sendData(JSON.stringify(data));
     }
 
     function callMaster() {
         window.Telegram.WebApp.openTelegramLink("https://t.me/grigorii_saveliev");
     }
-    
-    document.getElementById("isKotedge").addEventListener("change", updateTitle);
-    renderWorks();
   </script>
 </body>
 </html>
