@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -55,7 +56,7 @@
 </head>
 <body>
   <div class="card">
-    <h2 id="title">Калькулятор 2026</h2>
+    <h2 id="title">Приблизительный расчёт ремонта</h2>
     
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
         <div>
@@ -65,8 +66,9 @@
         <div>
             <label>Комнаты:</label>
             <select id="rooms">
-                <option value="1">1-к</option><option value="2">2-к</option>
-                <option value="3">3-к</option><option value="4+">4+</option>
+                <option value="1">1-комнатная</option><option value="2">2-комнатная</option>
+                <option value="3">3-комнатная</option><option value="4">4-комнатная</option>
+                <option value="5">5-комнатная</option><option value="6">6-комнатная</option>
             </select>
         </div>
     </div>
@@ -263,15 +265,15 @@
             {name: "Монтаж столешницы (бетон)", unit: "м²", price: 12500},
             {name: "Покраска дверей", unit: "шт", price: 2100},
             {name: "Установка подоконника", unit: "шт", price: 2500},
-            {name: "Монтаж откосов (портал)", unit: "компл", price: 2500}
+            {name: "Монтаж откосов (портал)", unit: "компл", price: 2500},
+            {name: "Магазин (доставка/подъем)", unit: "шт", price: 30000},
+            {name: "Вывоз мусора", unit: "шт", price: 7000}
         ]
       },
       "Прочие работы": {
         "Разное": [
             {name: "Радиаторы (монтаж)", unit: "шт", price: 1700},
-            {name: "Зеркало", unit: "шт", price: 2500},
-            {name: "Магазин (доставка/подъем)", unit: "шт", price: 30000},
-            {name: "Вывоз мусора", unit: "шт", price: 7000}
+            {name: "Зеркало", unit: "шт", price: 2500}
         ]
       }
     };
@@ -296,6 +298,18 @@
 
     renderSubTabs();
     renderWorks();
+    
+    // Обновление заголовка при выборе частного дома
+    function updateTitle() {
+        const isKotedge = document.getElementById("isKotedge").checked;
+        const titleEl = document.getElementById("title");
+        titleEl.innerText = isKotedge 
+            ? "Приблизительный расчёт ремонта (коттеджа)" 
+            : "Приблизительный расчёт ремонта";
+    }
+    
+    // Добавляем слушатель для чекбокса
+    document.getElementById("isKotedge").addEventListener("change", updateTitle);
 
     function switchSection(sectionName, btn) {
         // Смена активного класса
@@ -459,6 +473,10 @@
     function callMaster() {
         window.Telegram.WebApp.openTelegramLink("https://t.me/grigorii_saveliev");
     }
+    
+    // Инициализируем заголовок
+    updateTitle();
   </script>
 </body>
 </html>
+```
