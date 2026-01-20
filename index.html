@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Калькулятор УютФинал</title>
-  <script src="https://telegram.org/js/telegram-web-app.js  "></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter  :wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root { 
         --primary: #d35400; 
@@ -102,9 +102,6 @@
     tg.expand();
 
     // ================== ДАННЫЕ СМЕТЫ ==================
-    // Структура: Категория -> Подгруппа -> Список работ
-    // Если подгрупп нет, используем "Общие работы"
-    
     const WORKS_DATA = {
       "Демонтажные работы": {
         "Стены": [
@@ -273,17 +270,28 @@
       }
     };
 
+    // ВАЖНО: Фиксированный порядок разделов, чтобы индексы совпадали с ботом
+    const SECTION_ORDER = [
+        "Демонтажные работы",
+        "Потолок (Монтаж)",
+        "Стены (Монтаж)",
+        "Пол (Монтаж)",
+        "Электрика",
+        "Сантехника",
+        "Двери и Прочее"
+    ];
+
     // Переменные состояния
     let currentQuantities = {};
-    let activeSection = Object.keys(WORKS_DATA)[0];
+    let activeSection = SECTION_ORDER[0];
     let activeSubSection = Object.keys(WORKS_DATA[activeSection])[0];
 
     // Инициализация
     const tabsContainer = document.getElementById("tabs");
     const subTabsContainer = document.getElementById("sub-tabs-area");
 
-    // Рендер Главных вкладок
-    Object.keys(WORKS_DATA).forEach(secName => {
+    // Рендер Главных вкладок (Используем SECTION_ORDER!)
+    SECTION_ORDER.forEach(secName => {
         const btn = document.createElement("div");
         btn.className = `tab-button ${secName === activeSection ? 'active' : ''}`;
         btn.innerText = secName.replace(" (Монтаж)", "").replace(" работы", "");
@@ -303,16 +311,13 @@
             : "Приблизительный расчёт ремонта";
     }
     
-    // Добавляем слушатель для чекбокса
     document.getElementById("isKotedge").addEventListener("change", updateTitle);
 
     function switchSection(sectionName, btn) {
-        // Смена активного класса
         document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         
         activeSection = sectionName;
-        // При смене раздела выбираем первую подгруппу
         activeSubSection = Object.keys(WORKS_DATA[sectionName])[0];
         
         renderSubTabs();
@@ -322,11 +327,6 @@
     function renderSubTabs() {
         subTabsContainer.innerHTML = '';
         const subGroups = Object.keys(WORKS_DATA[activeSection]);
-        
-        // Если подгруппа только одна и она называется "Основные работы" или "Разное", можно скрыть, 
-        // но для единообразия оставим или скроем.
-        // Здесь: всегда показываем, чтобы было понятно.
-        
         subTabsContainer.style.display = 'flex';
 
         subGroups.forEach(subName => {
@@ -348,7 +348,6 @@
         const items = WORKS_DATA[activeSection][activeSubSection];
 
         items.forEach((item) => {
-            // Генерируем уникальный ключ: Категория|Подгруппа|Название
             const key = `${activeSection}|${activeSubSection}|${item.name}`;
             const saved = currentQuantities[key] || { qty: 0 };
             const isChecked = saved.qty > 0;
@@ -375,7 +374,6 @@
         calculate();
     }
 
-    // Логика чекбоксов и ввода
     window.toggle = function(key, price, checked) {
         const input = document.querySelector(`input[oninput*="'${key}'"]`);
         if(checked) {
@@ -414,13 +412,11 @@
         const packed = [];
         let totalSum = 0;
 
-        // Чтобы бот понял структуру, мы должны "выпрямить" вложенность.
-        // Мы будем перебирать WORKS_DATA в строгом порядке и назначать индексы.
-        
         let globalSectionIdx = 0;
         
-        Object.keys(WORKS_DATA).forEach((secName) => {
-            let globalItemIdx = 0; // Сквозной индекс внутри категории (сквозь подгруппы)
+        // ВАЖНО: Используем SECTION_ORDER для строгой последовательности
+        SECTION_ORDER.forEach((secName) => {
+            let globalItemIdx = 0; 
             
             Object.keys(WORKS_DATA[secName]).forEach((subName) => {
                 const items = WORKS_DATA[secName][subName];
@@ -430,7 +426,6 @@
                     const sel = currentQuantities[key];
                     
                     if(sel && sel.qty > 0) {
-                        // Добавляем: [ИндексКатегории, СквознойИндексТовара, Количество]
                         packed.push([globalSectionIdx, globalItemIdx, sel.qty]);
                         totalSum += Math.round(sel.qty * item.price);
                     }
@@ -456,7 +451,7 @@
             addr: document.getElementById("address").value || "Не указан",
             ar: document.getElementById("area").value,
             rm: document.getElementById("rooms").value,
-            tp: "user_calc", // Метка, что расчет пользовательский
+            tp: "user_calc",
             kt: document.getElementById("isKotedge").checked ? 1 : 0,
             tt: totalSum,
             pk: packed
@@ -466,10 +461,9 @@
     }
 
     function callMaster() {
-        window.Telegram.WebApp.openTelegramLink("https://t.me/grigorii_saveliev  ");
+        window.Telegram.WebApp.openTelegramLink("https://t.me/grigorii_saveliev");
     }
     
-    // Инициализируем заголовок
     updateTitle();
   </script>
 </body>
