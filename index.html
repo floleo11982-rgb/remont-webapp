@@ -300,7 +300,7 @@
       }
     };
 
-    // ВАЖНО: Фиксированный порядок разделов — 11 штук как в боте
+    // ВАЖНО: Фиксированный порядок разделов — 10 штук как в боте
     const SECTION_ORDER = [
         "Демонтажные работы",
         "Потолок (Монтаж)",
@@ -484,7 +484,6 @@
             addr: document.getElementById("address").value || "Не указан",
             ar: document.getElementById("area").value,
             rm: document.getElementById("rooms").value,
-            tp: "user_calc",
             kt: document.getElementById("isKotedge").checked ? 1 : 0,
             tt: totalSum,
             pk: packed
